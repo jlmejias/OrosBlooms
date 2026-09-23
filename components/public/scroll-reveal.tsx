@@ -5,7 +5,7 @@ import { useEffect } from "react";
 export function ScrollReveal() {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const targets = document.querySelectorAll<HTMLElement>(".home-section, .commerce-hero, .catalog-grid, .editorial-split, .detail-grid");
+    const targets = document.querySelectorAll<HTMLElement>(".home-section, .home-custom-section, .commerce-hero, .catalog-grid, .editorial-split, .detail-grid");
     document.documentElement.classList.add("motion-ready");
     targets.forEach(target => target.classList.add("reveal-target"));
     const observer = new IntersectionObserver(entries => {
