@@ -4,22 +4,36 @@ import { Container } from "@/components/shared/layout";
 import { categories, editorialFeaturedProducts, featuredProducts } from "./home-data";
 import { Icon } from "./icons";
 import { getBusinessSettings } from "@/lib/business";
+import { homepageSectionDefaults, type HomepageSectionKey } from "@/lib/homepage";
 import type { Locale } from "@/lib/i18n";
+
+type EditableContent = Record<string, unknown> | undefined;
+
+function copyFor(key: HomepageSectionKey, content: EditableContent, locale: Locale) {
+  const fallback = homepageSectionDefaults[key];
+  const spanish = locale === "es";
+  const value = content ?? {};
+  const title = value[spanish ? "titleEs" : "titleEn"] || value[spanish ? "titleEn" : "titleEs"] || fallback[spanish ? "titleEs" : "titleEn"];
+  const subtitle = value[spanish ? "subtitleEs" : "subtitleEn"] || value[spanish ? "subtitleEn" : "subtitleEs"] || fallback[spanish ? "subtitleEs" : "subtitleEn"];
+  return { title: String(title), subtitle: String(subtitle) };
+}
 
 function SectionIntro({ eyebrow, title, description, action }: { eyebrow: string; title: string; description?: string; action?: { label: string; target: string } }) {
   return <div className="home-section-intro"><div><p className="home-eyebrow">{eyebrow}</p><h2>{title}</h2>{description && <p className="home-section-description">{description}</p>}</div>{action && <a className="home-inline-link" href={action.target}>{action.label}<Icon name="arrow" size={17} /></a>}</div>;
 }
 
-export function HomeCategories({locale}:{locale:Locale}) {
+export function HomeCategories({locale,content}:{locale:Locale;content?:EditableContent}) {
   const es=locale==="es";
-  return <section id="categorias" className="home-categories home-section"><Container><SectionIntro eyebrow={es?"Encuentra tu momento":"Find your moment"} title={es?"Cada ocasión merece flores.":"Every occasion deserves flowers."} description={es?"Desde un gesto pequeño hasta la celebración de tu vida.":"From a small gesture to the celebration of a lifetime."} />
+  const copy=copyFor("categories",content,locale);
+  return <section id="categorias" className="home-categories home-section"><Container><SectionIntro eyebrow={es?"Encuentra tu momento":"Find your moment"} title={copy.title} description={copy.subtitle} />
     <div className="home-category-rail">{categories.map((category) => <a className="home-category" href={`#${category.target}`} key={category.title}><span className="home-category-image"><Image src={category.image} alt={category.alt} fill sizes="(max-width: 768px) 108px, (max-width: 1280px) 14vw, 180px" className="home-cover" /></span><span className="home-category-title">{category.title}</span><span className="home-category-more">Ver inspiración <Icon name="arrow" size={14} /></span></a>)}</div>
   </Container></section>;
 }
 
-export function HomeStory({locale}:{locale:Locale}) {
+export function HomeStory({locale,content}:{locale:Locale;content?:EditableContent}) {
   const es=locale==="es";
-  return <section id="historia" className="home-story home-section"><Container><div className="home-story-grid"><div className="home-story-image"><Image src="/bouquet-editorial.png" alt={es?"Ramo artesanal en tonos rosados y crema":"Handcrafted bouquet in blush and cream tones"} fill sizes="(max-width: 1024px) 100vw, 52vw" className="home-cover" /></div><div className="home-story-copy"><p className="home-eyebrow">{es?"La esencia de OrosBlooms":"The essence of OrosBlooms"}</p><h2>{es?<>Más que flores,<br/><em>es tu historia.</em></>:<>More than flowers,<br/><em>it is your story.</em></>}</h2><div className="home-story-rule"/><p>{es?"Desde el ramo de novia hasta el detalle que ilumina un día cualquiera. Creamos atmósferas que se sienten y se recuerdan.":"From a bridal bouquet to the detail that brightens an ordinary day. We create atmospheres that are felt and remembered."}</p><a className="home-inline-link" href="#bodas">{es?"Descubre bodas y eventos":"Discover weddings and events"} <Icon name="arrow" size={18}/></a></div></div></Container></section>;
+  const copy=copyFor("story",content,locale);
+  return <section id="historia" className="home-story home-section"><Container><div className="home-story-grid"><div className="home-story-image"><Image src="/bouquet-editorial.png" alt={es?"Ramo artesanal en tonos rosados y crema":"Handcrafted bouquet in blush and cream tones"} fill sizes="(max-width: 1024px) 100vw, 52vw" className="home-cover" /></div><div className="home-story-copy"><p className="home-eyebrow">{es?"La esencia de OrosBlooms":"The essence of OrosBlooms"}</p><h2>{copy.title}</h2><div className="home-story-rule"/><p>{copy.subtitle}</p><a className="home-inline-link" href="#bodas">{es?"Descubre bodas y eventos":"Discover weddings and events"} <Icon name="arrow" size={18}/></div></div></Container></section>;
 }
 
 export function HomeFeatured({locale}:{locale:Locale}) {
@@ -30,14 +44,16 @@ export function HomeFeatured({locale}:{locale:Locale}) {
   </Container></section>;
 }
 
-export function FeaturedProductsSection({locale}:{locale:Locale}) {
+export function FeaturedProductsSection({locale,content}:{locale:Locale;content?:EditableContent}) {
   const es=locale==="es";
-  return <section className="home-editorial-products home-section" aria-labelledby="featured-products-title"><Container><div className="home-editorial-products-layout"><div className="home-editorial-products-copy"><p className="home-eyebrow">{es?"Arreglos destacados":"Featured arrangements"}</p><h2 id="featured-products-title">{es?<>Flores que<br/><em>iluminan momentos.</em></>:<>Flowers that<br/><em>brighten moments.</em></>}</h2><p>{es?"Nuestros arreglos más queridos, listos para hacer de cualquier día algo especial.":"Our most-loved arrangements, ready to make any day feel special."}</p><Link className="home-pill home-pill-dark" href="/flores">{es?"Ver todos los arreglos":"View all arrangements"} <Icon name="arrow" size={17}/></Link></div><div className="home-editorial-product-rail">{editorialFeaturedProducts.map(product=><article className="home-editorial-product" key={product.nameEn}><Link href="/flores"><div className="home-editorial-product-image"><Image src={product.image} alt={es?product.altEs:product.altEn} fill sizes="(max-width: 639px) 78vw, (max-width: 1023px) 42vw, 20vw" className="home-cover"/><span className="home-editorial-heart" aria-hidden="true">♡</span></div><h3>{es?product.nameEs:product.nameEn}</h3><p>{es?product.descriptionEs:product.descriptionEn}</p><strong>{es?"Desde":"From"} {product.price}</strong><span className="home-editorial-view">{es?"Ver arreglo":"View arrangement"} <Icon name="arrow" size={14}/></span></Link></article>)}</div></div></Container></section>;
+  const copy=copyFor("featuredEditorial",content,locale);
+  return <section className="home-editorial-products home-section" aria-labelledby="featured-products-title"><Container><div className="home-editorial-products-layout"><div className="home-editorial-products-copy"><p className="home-eyebrow">{es?"Arreglos destacados":"Featured arrangements"}</p><h2 id="featured-products-title">{copy.title}</h2><p>{copy.subtitle}</p><Link className="home-pill home-pill-dark" href="/flores">{es?"Ver todos los arreglos":"View all arrangements"} <Icon name="arrow" size={17}/></Link></div><div className="home-editorial-product-rail">{editorialFeaturedProducts.map(product=><article className="home-editorial-product" key={product.nameEn}><Link href="/flores"><div className="home-editorial-product-image"><Image src={product.image} alt={es?product.altEs:product.altEn} fill sizes="(max-width: 639px) 78vw, (max-width: 1023px) 42vw, 20vw" className="home-cover"/><span className="home-editorial-heart" aria-hidden="true">♡</span></div><h3>{es?product.nameEs:product.nameEn}</h3><p>{es?product.descriptionEs:product.descriptionEn}</p><strong>{es?"Desde":"From"} {product.price}</strong><span className="home-editorial-view">{es?"Ver arreglo":"View arrangement"} <Icon name="arrow" size={14}/></span></Link></article>)}</div></div></Container></section>;
 }
 
-export function GiftAddonsSection({locale}:{locale:Locale}) {
+export function GiftAddonsSection({locale,content}:{locale:Locale;content?:EditableContent}) {
   const es=locale==="es";
-  return <section className="home-gift-addons" aria-labelledby="gift-addons-title"><div className="home-gift-addons-image"><Image src="/home-gift-addons.png" alt={es?"Flores rosadas con chocolates, tarjeta y osito":"Blush flowers with chocolates, a card and teddy bear"} fill sizes="(max-width: 639px) 100vw, 62vw" className="home-cover"/></div><Container className="home-gift-addons-container"><div className="home-gift-addons-copy"><p className="home-eyebrow">{es?"Detalles que completan tu regalo":"Details that complete your gift"}</p><h2 id="gift-addons-title">{es?<>Hazlo aún<br/><em>más especial.</em></>:<>Make it even<br/><em>more special.</em></>}</h2><p>{es?"Agrega un osito, chocolates, globos o una tarjeta personalizada y crea un momento inolvidable.":"Add a teddy bear, chocolates, balloons or a personalized card and create an unforgettable moment."}</p><Link className="home-inline-link" href="/crear-regalo">{es?"Ver complementos":"View extras"} <Icon name="arrow" size={18}/></Link></div></Container></section>;
+  const copy=copyFor("giftAddons",content,locale);
+  return <section className="home-gift-addons" aria-labelledby="gift-addons-title"><div className="home-gift-addons-image"><Image src="/home-gift-addons.png" alt={es?"Flores rosadas con chocolates, tarjeta y osito":"Blush flowers with chocolates, a card and teddy bear"} fill sizes="(max-width: 639px) 100vw, 62vw" className="home-cover"/></div><Container className="home-gift-addons-container"><div className="home-gift-addons-copy"><p className="home-eyebrow">{es?"Detalles que completan tu regalo":"Details that complete your gift"}</p><h2 id="gift-addons-title">{copy.title}</h2><p>{copy.subtitle}</p><Link className="home-inline-link" href="/crear-regalo">{es?"Ver complementos":"View extras"} <Icon name="arrow" size={18}/></Link></div></Container></section>;
 }
 
 export function HomeWedding({locale}:{locale:Locale}) {

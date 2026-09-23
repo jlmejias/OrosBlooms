@@ -1,13 +1,68 @@
 "use client";
 
-import { App, Button, Checkbox, DatePicker, Form, Input, InputNumber, Select } from "antd";
-import dayjs from "dayjs";
+import { App, Button, Checkbox, Form, Input } from "antd";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import { saveHomepageSection } from "@/app/admin/actions";
+import { homepageSectionDefaults, type HomepageSectionKey } from "@/lib/homepage";
 
-type Content={titleEs?:string;titleEn?:string;subtitleEs?:string;subtitleEn?:string;image?:string;ctaLabelEs?:string;ctaLabelEn?:string;ctaHref?:string};
-type Section={id:string;key:string;sortOrder:number;visible:boolean;startsAt:Date|null;endsAt:Date|null;content:Record<string,unknown>};
-const choices=[{value:"promotion",label:"Promoción o campaña"},{value:"announcement",label:"Anuncio"},{value:"editorial",label:"Bloque editorial"},{value:"categories",label:"Categorías"},{value:"story",label:"Nuestra historia"},{value:"featured",label:"Productos destacados"},{value:"wedding",label:"Bodas"},{value:"events",label:"Eventos"},{value:"personalized",label:"Personalizados"},{value:"gallery",label:"Galería"},{value:"testimonial",label:"Testimonio"},{value:"cta",label:"Llamado final"}];
-const schema=yup.object({key:yup.string().matches(/^[a-z][a-zA-Z0-9-]*$/,"Usa una clave sin espacios").required("Selecciona un tipo"),titleEs:yup.string().required("Escribe el título en español"),titleEn:yup.string().required("Escribe el título en inglés"),sortOrder:yup.number().min(0).required()});
-export function HomepageSectionForm({section}:{section?:Section}){const{message}=App.useApp();const content=section?.content as Content|undefined;const formik=useFormik({enableReinitialize:true,initialValues:{key:section?.key??"promotion",titleEs:content?.titleEs??"",titleEn:content?.titleEn??"",subtitleEs:content?.subtitleEs??"",subtitleEn:content?.subtitleEn??"",image:content?.image??"",ctaLabelEs:content?.ctaLabelEs??"",ctaLabelEn:content?.ctaLabelEn??"",ctaHref:content?.ctaHref??"",sortOrder:section?.sortOrder??0,visible:section?.visible??true,startsAt:section?.startsAt??null,endsAt:section?.endsAt??null},validationSchema:schema,onSubmit:async values=>{try{const data=new FormData();if(section)data.set("id",section.id);Object.entries(values).forEach(([key,value])=>{if(value instanceof Date)data.set(key,value.toISOString());else if(typeof value==="boolean"){if(value)data.set(key,"on");}else data.set(key,String(value??""));});await saveHomepageSection(data);message.success(section?"Sección actualizada y publicada.":"Sección creada y publicada.");}catch(error){message.error(error instanceof Error?error.message:"No se pudo guardar la sección.");}}});const error=(name:keyof typeof formik.values)=>formik.touched[name]&&formik.errors[name]?String(formik.errors[name]):undefined;return <form className="admin-form home-editor-form" onSubmit={formik.handleSubmit}><Form.Item label="Tipo de sección" validateStatus={error("key")?"error":""} help={error("key")}><Select value={formik.values.key} options={choices} onChange={value=>formik.setFieldValue("key",value)} showSearch/></Form.Item><div className="home-editor-languages"><section className="admin-form-section"><header><h3>Español</h3><p>Contenido que verá el sitio en español.</p></header><Form.Item label="Título" help={error("titleEs")} validateStatus={error("titleEs")?"error":""}><Input value={formik.values.titleEs} placeholder="Ej. Hazlo aún más especial" onChange={event=>formik.setFieldValue("titleEs",event.target.value)}/></Form.Item><Form.Item label="Texto de apoyo"><Input.TextArea value={formik.values.subtitleEs} placeholder="Describe brevemente esta sección" onChange={event=>formik.setFieldValue("subtitleEs",event.target.value)}/></Form.Item><Form.Item label="Texto del botón"><Input value={formik.values.ctaLabelEs} placeholder="Ej. Ver colección" onChange={event=>formik.setFieldValue("ctaLabelEs",event.target.value)}/></Form.Item></section><section className="admin-form-section"><header><h3>English</h3><p>Content shown when the site is in English.</p></header><Form.Item label="Title" help={error("titleEn")} validateStatus={error("titleEn")?"error":""}><Input value={formik.values.titleEn} placeholder="E.g. Make it even more special" onChange={event=>formik.setFieldValue("titleEn",event.target.value)}/></Form.Item><Form.Item label="Supporting text"><Input.TextArea value={formik.values.subtitleEn} placeholder="Briefly describe this section" onChange={event=>formik.setFieldValue("subtitleEn",event.target.value)}/></Form.Item><Form.Item label="Button text"><Input value={formik.values.ctaLabelEn} placeholder="E.g. View collection" onChange={event=>formik.setFieldValue("ctaLabelEn",event.target.value)}/></Form.Item></section></div><Form.Item label="Imagen"><Input value={formik.values.image} placeholder="/uploads/imagen.webp o https://..." onChange={event=>formik.setFieldValue("image",event.target.value)}/></Form.Item><Form.Item label="Enlace del botón"><Input value={formik.values.ctaHref} placeholder="/flores" onChange={event=>formik.setFieldValue("ctaHref",event.target.value)}/></Form.Item><Form.Item label="Orden"><InputNumber min={0} value={formik.values.sortOrder} placeholder="0" onChange={value=>formik.setFieldValue("sortOrder",value??0)} style={{width:"100%"}}/></Form.Item><div className="home-editor-dates"><Form.Item label="Publicar desde"><DatePicker showTime value={formik.values.startsAt?dayjs(formik.values.startsAt):null} placeholder="Sin fecha de inicio" onChange={value=>formik.setFieldValue("startsAt",value?.toDate()??null)} style={{width:"100%"}}/></Form.Item><Form.Item label="Publicar hasta"><DatePicker showTime value={formik.values.endsAt?dayjs(formik.values.endsAt):null} placeholder="Sin fecha final" onChange={value=>formik.setFieldValue("endsAt",value?.toDate()??null)} style={{width:"100%"}}/></Form.Item></div><Checkbox checked={formik.values.visible} onChange={event=>formik.setFieldValue("visible",event.target.checked)}>Mostrar esta sección</Checkbox><Button type="primary" htmlType="submit" loading={formik.isSubmitting}>{section?"Guardar cambios":"Crear sección"}</Button></form>}
+type Content = { titleEs?: string; titleEn?: string; subtitleEs?: string; subtitleEn?: string };
+type Section = { id?: string; key: HomepageSectionKey; visible?: boolean; content?: Record<string, unknown> };
+
+const schema = yup.object({
+  titleEs: yup.string().trim().required("Escribe el título en español"),
+  titleEn: yup.string().trim().required("Escribe el título en inglés"),
+  subtitleEs: yup.string().trim().required("Escribe el texto de apoyo en español"),
+  subtitleEn: yup.string().trim().required("Escribe el texto de apoyo en inglés"),
+});
+
+export function HomepageSectionForm({ section }: { section: Section }) {
+  const { message } = App.useApp();
+  const fallback = homepageSectionDefaults[section.key];
+  const content = section.content as Content | undefined;
+  const formik = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      titleEs: content?.titleEs ?? fallback.titleEs,
+      titleEn: content?.titleEn ?? fallback.titleEn,
+      subtitleEs: content?.subtitleEs ?? fallback.subtitleEs,
+      subtitleEn: content?.subtitleEn ?? fallback.subtitleEn,
+      visible: section.visible ?? true,
+    },
+    validationSchema: schema,
+    onSubmit: async (values) => {
+      try {
+        const data = new FormData();
+        if (section.id) data.set("id", section.id);
+        data.set("key", section.key);
+        data.set("sortOrder", String(fallback.sortOrder));
+        data.set("titleEs", values.titleEs);
+        data.set("titleEn", values.titleEn);
+        data.set("subtitleEs", values.subtitleEs);
+        data.set("subtitleEn", values.subtitleEn);
+        if (values.visible) data.set("visible", "on");
+        await saveHomepageSection(data);
+        message.success("Sección guardada. La portada ya está actualizada.");
+      } catch (error) {
+        message.error(error instanceof Error ? error.message : "No se pudo guardar la sección.");
+      }
+    },
+  });
+  const error = (name: keyof typeof formik.values) => formik.touched[name] && formik.errors[name] ? String(formik.errors[name]) : undefined;
+
+  return <form className="admin-form home-editor-form" onSubmit={formik.handleSubmit}>
+    <p className="admin-form-hint">Editando: <strong>{fallback.label}</strong></p>
+    <div className="home-editor-languages">
+      <section className="admin-form-section"><header><h3>Español</h3><p>Contenido que verá el sitio en español.</p></header>
+        <Form.Item label="Título" help={error("titleEs")} validateStatus={error("titleEs") ? "error" : ""}><Input value={formik.values.titleEs} onChange={(event) => formik.setFieldValue("titleEs", event.target.value)} /></Form.Item>
+        <Form.Item label="Texto de apoyo" help={error("subtitleEs")} validateStatus={error("subtitleEs") ? "error" : ""}><Input.TextArea rows={4} value={formik.values.subtitleEs} onChange={(event) => formik.setFieldValue("subtitleEs", event.target.value)} /></Form.Item>
+      </section>
+      <section className="admin-form-section"><header><h3>English</h3><p>Content shown when the site is in English.</p></header>
+        <Form.Item label="Title" help={error("titleEn")} validateStatus={error("titleEn") ? "error" : ""}><Input value={formik.values.titleEn} onChange={(event) => formik.setFieldValue("titleEn", event.target.value)} /></Form.Item>
+        <Form.Item label="Supporting text" help={error("subtitleEn")} validateStatus={error("subtitleEn") ? "error" : ""}><Input.TextArea rows={4} value={formik.values.subtitleEn} onChange={(event) => formik.setFieldValue("subtitleEn", event.target.value)} /></Form.Item>
+      </section>
+    </div>
+    <Checkbox checked={formik.values.visible} onChange={(event) => formik.setFieldValue("visible", event.target.checked)}>Mostrar esta sección en la portada</Checkbox>
+    <Button type="primary" htmlType="submit" loading={formik.isSubmitting}>Guardar sección</Button>
+  </form>;
+}
