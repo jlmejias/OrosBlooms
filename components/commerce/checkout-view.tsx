@@ -7,20 +7,22 @@ import type { Locale } from "@/lib/i18n";
 import { cartTotal } from "@/lib/store";
 import { useStore } from "./store-provider";
 
-type Result = { reference: string; trackingUrl: string; sinpeNumber?: string | null; amount: number; paymentPending?: boolean };
+type Result = { reference: string; trackingToken: string; trackingUrl: string; sinpeNumber?: string | null; amount: number; paymentPending?: boolean };
 
 export function CheckoutView({ locale }: { locale: Locale }) {
   const es = locale === "es";
   const { cart, clearCart } = useStore();
-  const [method, setMethod] = useState<"stripe" | "sinpe">("stripe");
+  const [method, setMethod] = useState<"stripe" | "sinpe">("sinpe");
   const [fulfillment, setFulfillment] = useState<"delivery" | "pickup">("delivery");
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [proofLoading, setProofLoading] = useState(false);
+  const [proofMessage, setProofMessage] = useState("");
   const total = cartTotal(cart);
 
   if (!cart.length && !result) return <section className="cart-empty"><h2>{es ? "Tu carrito está vacío" : "Your cart is empty"}</h2><Link className="commerce-primary" href="/flores">{es ? "Ver flores" : "Browse flowers"}</Link></section>;
-  if (result) return <section className="cart-empty"><span>✓</span><h2>{es ? "Pedido creado" : "Order created"}</h2><p>{es ? `Tu referencia es ${result.reference}.` : `Your reference is ${result.reference}.`}</p>{method === "sinpe" ? <><p>{result.sinpeNumber ? `${es ? "Envía" : "Send"} ${formatCRC(result.amount)} ${es ? "por SINPE Móvil al" : "by SINPE Móvil to"} ${result.sinpeNumber}. ${es ? "Te confirmaremos el pago tras revisarlo." : "We will confirm payment after review."}` : es ? "SINPE Móvil aún no está configurado." : "SINPE Móvil is not configured yet."}</p></> : <p>{es ? "Stripe se conectará al configurar sus credenciales." : "Stripe will connect once its credentials are configured."}</p>}<Link className="commerce-primary" href={result.trackingUrl}>{es ? "Ver seguimiento" : "Track order"}</Link></section>;
+  if (result) return <section className="cart-empty"><span>✓</span><h2>{es ? "Pedido creado" : "Order created"}</h2><p>{es ? `Tu referencia es ${result.reference}.` : `Your reference is ${result.reference}.`}</p>{method === "sinpe" ? <><p>{result.sinpeNumber ? `${es ? "Envía" : "Send"} ${formatCRC(result.amount)} ${es ? "por SINPE Móvil al" : "by SINPE Móvil to"} ${result.sinpeNumber}.` : es ? "SINPE Móvil aún no está configurado." : "SINPE Móvil is not configured yet."}</p><form className="commerce-form commerce-proof-form" onSubmit={uploadProof}><label>{es ? "Comprobante de pago" : "Payment proof"}<input name="proof" type="file" accept="image/jpeg,image/png,image/webp" required/></label><p>{es ? "Sube una captura clara del comprobante. Revisaremos el pago antes de preparar tu pedido." : "Upload a clear screenshot of the transfer. We will review payment before preparing your order."}</p>{proofMessage && <p role="status">{proofMessage}</p>}<button className="commerce-primary" disabled={proofLoading}>{proofLoading ? (es ? "Subiendo comprobante…" : "Uploading proof…") : (es ? "Enviar comprobante" : "Send proof")}</button></form></> : <p>{es ? "Stripe se conectará al configurar sus credenciales." : "Stripe will connect once its credentials are configured."}</p>}<Link className="commerce-primary" href={result.trackingUrl}>{es ? "Ver seguimiento" : "Track order"}</Link></section>;
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setError(""); setLoading(true);
@@ -29,6 +31,18 @@ export function CheckoutView({ locale }: { locale: Locale }) {
     const data = await response.json(); setLoading(false);
     if (!response.ok) { setError(data.error || (es ? "No se pudo crear el pedido." : "We could not create the order.")); return; }
     clearCart(); setResult(data);
+  }
+
+  async function uploadProof(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); if (!result) return;
+    setProofLoading(true); setProofMessage("");
+    const form = new FormData(event.currentTarget); form.set("reference", result.reference); form.set("token", result.trackingToken);
+    try {
+      const response = await fetch("/api/payment-proof", { method: "POST", body: form });
+      const data = await response.json();
+      setProofMessage(response.ok ? (es ? "Comprobante enviado. Te avisaremos cuando confirmemos el pago." : "Proof sent. We will notify you once payment is confirmed.") : data.error || (es ? "No se pudo subir el comprobante." : "We could not upload the proof."));
+    } catch { setProofMessage(es ? "No se pudo conectar para subir el comprobante." : "We could not connect to upload the proof."); }
+    finally { setProofLoading(false); }
   }
 
   return <form className="commerce-form" onSubmit={submit}>

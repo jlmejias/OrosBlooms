@@ -15,6 +15,7 @@ export async function POST(request: Request) {
   const parsed = bodySchema.safeParse(await request.json());
   if (!parsed.success) return NextResponse.json({ error: "Datos de compra inválidos." }, { status: 400 });
   const value = parsed.data;
+  if (value.paymentMethod === "stripe" && !process.env.STRIPE_SECRET_KEY) return NextResponse.json({ error: "El pago con tarjeta todavía no está disponible. Elige SINPE Móvil." }, { status: 503 });
   const variantIds = value.items.flatMap(item => item.variantId ? [item.variantId] : []);
   const rows = variantIds.length ? await db.select({ id: productVariants.id, productId: productVariants.productId, name: products.name, price: productVariants.price, available: productVariants.available, stock: productVariants.stockOnHand }).from(productVariants).innerJoin(products, eq(products.id, productVariants.productId)).where(and(inArray(productVariants.id, variantIds), eq(products.status, "active"))) : [];
   const byVariant = new Map(rows.map(row => [row.id, row]));
@@ -28,9 +29,8 @@ export async function POST(request: Request) {
   if (!customerId) return NextResponse.json({ error: "No se pudo crear el cliente." }, { status: 500 });
   const reference = `PED-${Date.now().toString().slice(-8)}`;
   const trackingToken = randomUUID().replaceAll("-", "");
-  const [order] = await db.insert(orders).values({ reference, trackingToken, customerId, fulfillment: value.fulfillment, deliveryAddress: value.deliveryAddress || null, subtotal, deliveryFee, total, deposit, balance: 0, paymentMethod: value.paymentMethod, paymentStatus: value.paymentMethod === "sinpe" ? "pending_review" : "unpaid", status: "pending" }).returning();
+  const [order] = await db.insert(orders).values({ reference, trackingToken, customerId, fulfillment: value.fulfillment, deliveryAddress: value.deliveryAddress || null, subtotal, deliveryFee, total, deposit, balance: 0, paymentMethod: value.paymentMethod, paymentStatus: "unpaid", status: "pending" }).returning();
   await db.insert(orderItems).values(value.items.map(item => { const row = byVariant.get(item.variantId!); return { orderId: order.id, productId: item.productId, variantId: item.variantId, nameSnapshot: row!.name, unitPriceSnapshot: row!.price, quantity: item.quantity, personalization: item.personalization ? { message: item.personalization } : null, lineTotal: row!.price * item.quantity }; }));
   if (value.paymentMethod === "sinpe") return NextResponse.json({ reference, trackingToken, trackingUrl: `/pedido/${reference}?token=${trackingToken}`, sinpeNumber: process.env.SINPE_MOBILE_NUMBER || null, amount: deposit });
-  if (!process.env.STRIPE_SECRET_KEY) return NextResponse.json({ error: "Stripe todavía no está configurado." }, { status: 503 });
   return NextResponse.json({ reference, trackingToken, trackingUrl: `/pedido/${reference}?token=${trackingToken}`, amount: deposit, paymentPending: true });
 }
