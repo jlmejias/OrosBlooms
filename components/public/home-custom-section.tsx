@@ -1,0 +1,5 @@
+import Image from "next/image";
+import type { Locale } from "@/lib/i18n";
+
+type Content={titleEs?:string;titleEn?:string;subtitleEs?:string;subtitleEn?:string;image?:string;ctaLabelEs?:string;ctaLabelEn?:string;ctaHref?:string};
+export function HomeCustomSection({content,locale,id}:{content:Record<string,unknown>;locale:Locale;id:string}){const value=content as Content;const es=locale==="es";const title=(es?value.titleEs:value.titleEn)||(es?value.titleEn:value.titleEs);if(!title)return null;const subtitle=(es?value.subtitleEs:value.subtitleEn)||(es?value.subtitleEn:value.subtitleEs);const cta=(es?value.ctaLabelEs:value.ctaLabelEn)||(es?value.ctaLabelEn:value.ctaLabelEs);return <section id={id} className="home-custom-section reveal-target"><div className="home-custom-copy"><p className="home-eyebrow">OrosBlooms</p><h2>{title}</h2>{subtitle&&<p>{subtitle}</p>}{cta&&value.ctaHref&&<a className="home-pill home-pill-dark" href={value.ctaHref}>{cta}</a>}</div>{value.image&&<div className="home-custom-image"><Image src={value.image} alt={title} fill sizes="(max-width: 800px) 100vw, 50vw" unoptimized/></div>}</section>}

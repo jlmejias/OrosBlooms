@@ -1,0 +1,7 @@
+import type { Metadata } from "next";
+import { PublicShell } from "@/components/commerce/public-shell";
+import { getBusinessSettings } from "@/lib/business";
+import { getLocale } from "@/lib/i18n";
+import { getSeoPolicies } from "@/lib/seo-policies";
+export const metadata: Metadata = { title: "Condiciones del servicio", alternates: { canonical: "/legal/terminos" } };
+export default async function TermsPage() { const[business,seo,locale]=await Promise.all([getBusinessSettings(),getSeoPolicies(),getLocale()]);const custom=locale==="es"?seo.termsEs:seo.termsEn;return <PublicShell><article className="commerce-wrap legal-copy"><p className="commerce-kicker">Legal</p><h1>{locale==="es"?"Condiciones del servicio.":"Terms of service."}</h1>{custom?<p style={{whiteSpace:"pre-wrap"}}>{custom}</p>:<><p>{locale==="es"?"Los precios mostrados son orientativos hasta confirmar disponibilidad, diseño, entrega y cotización final.":"Displayed prices are indicative until availability, design, delivery and the final quote are confirmed."}</p><h2>{locale==="es"?"Pedidos y pagos":"Orders and payments"}</h2><p>{locale==="es"?`Para confirmar un arreglo se requiere un adelanto del ${business.depositPercent}%.`:`A ${business.depositPercent}% deposit is required to confirm an arrangement.`}</p><h2>{locale==="es"?"Cancelaciones y devoluciones":"Cancellations and refunds"}</h2><p>{locale==="es"?business.cancellationPolicyEs:business.cancellationPolicyEn}</p></>}</article></PublicShell>; }

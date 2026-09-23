@@ -1,0 +1,26 @@
+.complement-options { display: grid; gap: .65rem; padding: 1rem; border: 1px solid var(--border); border-radius: 14px; }
+.complement-options legend { padding-inline: .35rem; font-size: .8rem; font-weight: 700; }
+.complement-options label { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: .7rem; }
+.complement-options input { width: 18px; min-height: 18px; }
+.purchase-total { display: flex; justify-content: space-between; font-size: 1rem; }
+.gift-builder { max-width: 850px; margin-bottom: 7rem; padding: clamp(1.25rem,4vw,2.5rem); border: 1px solid var(--border); border-radius: 24px; background: white; }
+.gift-progress { display: grid; grid-template-columns: repeat(4,1fr); gap: .5rem; margin: 0 0 2rem; padding: 0; list-style: none; color: var(--muted); font-size: .75rem; }
+.gift-progress li { padding-bottom: .65rem; border-bottom: 2px solid var(--border); }
+.gift-progress .is-current,.gift-progress .is-complete { border-color: var(--burgundy); color: var(--burgundy); }
+.gift-builder section { display: grid; gap: 1rem; }
+.gift-builder h2,.combo-card h2 { font-family: var(--font-display); font-size: clamp(2rem,4vw,3.2rem); font-weight: 400; }
+.gift-builder label { display: grid; gap: .45rem; font-size: .8rem; font-weight: 700; }
+.gift-builder select,.gift-builder input,.gift-builder textarea { width: 100%; min-height: 46px; padding: .75rem; border: 1px solid var(--border); border-radius: 10px; }
+.gift-builder textarea { min-height: 110px; }
+.gift-controls { display: flex; justify-content: space-between; margin-top: 2rem; }
+.gift-controls button { min-height: 44px; padding: .7rem 1.2rem; border: 0; border-radius: 999px; }
+.gift-review div { display: grid; grid-template-columns: 130px 1fr; gap: 1rem; padding-block: .8rem; border-bottom: 1px solid var(--border); }
+.gift-review dt { font-weight: 700; }
+.combo-grid { display: grid; gap: 1.5rem; padding-bottom: 7rem; }
+.combo-card { display: grid; grid-template-columns: minmax(260px,.8fr) 1.2fr; gap: clamp(1.5rem,5vw,4rem); align-items: center; padding: 1.5rem; border: 1px solid var(--border); border-radius: 24px; background: white; }
+.combo-image { position: relative; aspect-ratio: 4/3; overflow: hidden; border-radius: 18px; }
+.combo-image img { object-fit: cover; }
+.combo-card p,.combo-card ul { margin-top: 1rem; color: var(--muted); line-height: 1.7; }
+.combo-price { display: flex; align-items: center; gap: .8rem; }
+.combo-price strong { color: var(--foreground); font-size: 1.2rem; }
+@media(max-width:700px){.gift-progress{grid-template-columns:1fr 1fr}.gift-review div{grid-template-columns:1fr;gap:.25rem}.combo-card{grid-template-columns:1fr}}

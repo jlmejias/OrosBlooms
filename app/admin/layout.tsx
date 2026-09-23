@@ -1,0 +1,2 @@
+import { requireAdmin } from "@/lib/admin-auth"; import { AdminChrome } from "@/components/admin/admin-chrome"; import "antd/dist/reset.css"; import "./admin.css"; import "./admin-unified.css"; import "@/components/admin/identity-settings.css"; import "@/components/admin/identity-tab-polish.css"; import "@/components/admin/homepage-editor.css";
+export default async function AdminLayout({ children }: Readonly<{ children: React.ReactNode }>) {const session=await requireAdmin();return <AdminChrome email={session.email}>{children}</AdminChrome>}
