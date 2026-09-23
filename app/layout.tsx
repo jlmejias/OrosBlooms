@@ -4,6 +4,8 @@ import { getLocale } from "@/lib/i18n";
 import { getBrandingSettings } from "@/lib/branding";
 import { getSeoPolicies } from "@/lib/seo-policies";
 import { FormExperience } from "@/components/shared/form-experience";
+import { FormPendingFeedback } from "@/components/shared/form-pending-feedback";
+import { NavigationFeedback } from "@/components/shared/navigation-feedback";
 import "./globals.css";
 
 const baseMetadata: Metadata = {
@@ -28,5 +30,5 @@ export async function generateMetadata():Promise<Metadata>{const[branding,seo,lo
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const locale=await getLocale();
-  return <html lang={locale} data-scroll-behavior="smooth"><body><FormExperience/>{children}</body></html>;
+  return <html lang={locale} data-scroll-behavior="smooth"><body><NavigationFeedback/><FormExperience/><FormPendingFeedback/>{children}</body></html>;
 }
