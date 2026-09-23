@@ -25,7 +25,7 @@ export async function createInquiry(formData: FormData) {
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5_000_000) continue;
     const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
     const blob = await uploadPrivateBlob(`inquiries/${randomUUID()}.${extension}`, file);
-    const [asset] = await db.insert(mediaAssets).values({ provider: "vercel-blob-private", providerId: blob.pathname, url: blob.url, bytes: file.size, format: extension, alt: `Referencia privada ${index + 1}`, visibility: "private" }).returning();
+    const [asset] = await db.insert(mediaAssets).values({ provider: "cloudflare-r2-private", providerId: blob.pathname, url: blob.url, bytes: file.size, format: extension, alt: `Referencia privada ${index + 1}`, visibility: "private" }).returning();
     await db.insert(inquiryImages).values({ inquiryId: inquiry.id, mediaAssetId: asset.id, sortOrder: index });
   }
   try {
