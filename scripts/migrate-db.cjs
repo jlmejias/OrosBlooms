@@ -1,6 +1,9 @@
 const { Pool } = require("pg");
 const { drizzle } = require("drizzle-orm/node-postgres");
 const { migrate } = require("drizzle-orm/node-postgres/migrator");
+const { loadEnvConfig } = require("@next/env");
+
+loadEnvConfig(process.cwd());
 
 async function main() {
   if (!process.env.DATABASE_URL) {

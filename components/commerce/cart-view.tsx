@@ -48,7 +48,7 @@ export function CartView({ locale }: { locale: Locale }) {
       <p className="cart-summary-kicker">{es ? "Resumen" : "Summary"}</p>
       <div className="cart-summary-line"><span>{es ? "Subtotal estimado" : "Estimated subtotal"}</span><strong>{formatCRC(total)}</strong></div>
       <p className="cart-summary-note">{es ? "La entrega y el total final se confirman al coordinar tu pedido." : "Delivery and the final total are confirmed when arranging your order."}</p>
-      <Link className="commerce-primary" href="/solicitar?tipo=pedido">{es ? "Solicitar este pedido" : "Request this order"}</Link>
+      <Link className="commerce-primary" href="/checkout">{es ? "Continuar al pago" : "Continue to checkout"}</Link>
       <button className="cart-clear" type="button" onClick={clearCart}>{es ? "Vaciar carrito" : "Clear cart"}</button>
     </aside>
   </div>;

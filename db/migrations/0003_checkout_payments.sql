@@ -1,0 +1,13 @@
+ALTER TABLE "product_variants" ADD COLUMN "stock_on_hand" integer;
+ALTER TABLE "product_variants" ADD CONSTRAINT "product_variants_stock_nonnegative" CHECK ("stock_on_hand" IS NULL OR "stock_on_hand" >= 0);
+ALTER TABLE "orders" ADD COLUMN "payment_method" text;
+ALTER TABLE "orders" ADD COLUMN "payment_status" text DEFAULT 'unpaid' NOT NULL;
+ALTER TABLE "orders" ADD COLUMN "stripe_session_id" text;
+ALTER TABLE "orders" ADD COLUMN "payment_proof_asset_id" uuid REFERENCES "media_assets"("id") ON DELETE set null;
+ALTER TABLE "orders" ADD COLUMN "tracking_token" text;
+UPDATE "orders" SET "tracking_token" = replace(gen_random_uuid()::text, '-', '') WHERE "tracking_token" IS NULL;
+ALTER TABLE "orders" ALTER COLUMN "tracking_token" SET NOT NULL;
+ALTER TABLE "orders" ADD CONSTRAINT "orders_tracking_token_unique" UNIQUE("tracking_token");
+CREATE UNIQUE INDEX "orders_stripe_session_unique" ON "orders" ("stripe_session_id");
+ALTER TABLE "orders" ADD CONSTRAINT "orders_payment_method_check" CHECK ("payment_method" IS NULL OR "payment_method" IN ('stripe', 'sinpe'));
+ALTER TABLE "orders" ADD CONSTRAINT "orders_payment_status_check" CHECK ("payment_status" IN ('unpaid', 'pending_review', 'paid', 'failed', 'refunded'));
