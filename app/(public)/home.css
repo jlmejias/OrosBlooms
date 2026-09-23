@@ -177,11 +177,13 @@
   .home-search-desktop { width: 180px; }
 }
 
-@media (max-width: 1199px) and (min-width: 1024px) {
+@media (max-width: 1279px) and (min-width: 1024px) {
   .home-header-actions .home-deferred { display: none; }
 }
 
-@media (max-width: 1023px) {
+/* El encabezado de escritorio no cabe de forma fiable con todos sus enlaces
+   en pantallas intermedias o con zoom del navegador. */
+@media (max-width: 1279px) {
   .home-header-inner { min-height: 64px; justify-content: space-between; padding-inline: 1.25rem; }
   .home-header-inner > .home-icon-button { margin-left: -.65rem; }
   .home-menu-trigger { display: inline-flex; }
