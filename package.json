@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "test": "node --test tests/*.test.ts",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "node scripts/migrate-db.cjs",
     "db:check": "tsx scripts/check-db.ts",
     "db:seed": "tsx scripts/seed-db.ts",
     "db:check-business": "tsx scripts/check-business-db.ts"
@@ -36,7 +36,7 @@
     "@types/pg": "^8.15.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
-    "drizzle-kit": "^0.18.1",
+    "drizzle-kit": "^0.31.11",
     "eslint": "^9.0.0",
     "eslint-config-next": "^16.3.5",
     "tailwindcss": "^4.1.0",
