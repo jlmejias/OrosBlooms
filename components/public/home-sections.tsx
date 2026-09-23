@@ -33,7 +33,7 @@ export function HomeCategories({locale,content}:{locale:Locale;content?:Editable
 export function HomeStory({locale,content}:{locale:Locale;content?:EditableContent}) {
   const es=locale==="es";
   const copy=copyFor("story",content,locale);
-  return <section id="historia" className="home-story home-section"><Container><div className="home-story-grid"><div className="home-story-image"><Image src="/bouquet-editorial.png" alt={es?"Ramo artesanal en tonos rosados y crema":"Handcrafted bouquet in blush and cream tones"} fill sizes="(max-width: 1024px) 100vw, 52vw" className="home-cover" /></div><div className="home-story-copy"><p className="home-eyebrow">{es?"La esencia de OrosBlooms":"The essence of OrosBlooms"}</p><h2>{copy.title}</h2><div className="home-story-rule"/><p>{copy.subtitle}</p><a className="home-inline-link" href="#bodas">{es?"Descubre bodas y eventos":"Discover weddings and events"} <Icon name="arrow" size={18}/></div></div></Container></section>;
+  return <section id="historia" className="home-story home-section"><Container><div className="home-story-grid"><div className="home-story-image"><Image src="/bouquet-editorial.png" alt={es?"Ramo artesanal en tonos rosados y crema":"Handcrafted bouquet in blush and cream tones"} fill sizes="(max-width: 1024px) 100vw, 52vw" className="home-cover" /></div><div className="home-story-copy"><p className="home-eyebrow">{es?"La esencia de OrosBlooms":"The essence of OrosBlooms"}</p><h2>{copy.title}</h2><div className="home-story-rule"/><p>{copy.subtitle}</p><a className="home-inline-link" href="#bodas">{es?"Descubre bodas y eventos":"Discover weddings and events"} <Icon name="arrow" size={18}/></a></div></div></Container></section>;
 }
 
 export function HomeFeatured({locale}:{locale:Locale}) {
