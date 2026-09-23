@@ -16,6 +16,7 @@ export async function POST(request: Request) {
   if (!parsed.success) return NextResponse.json({ error: "Datos de compra inválidos." }, { status: 400 });
   const value = parsed.data;
   if (value.paymentMethod === "stripe" && !process.env.STRIPE_SECRET_KEY) return NextResponse.json({ error: "El pago con tarjeta todavía no está disponible. Elige SINPE Móvil." }, { status: 503 });
+  if (value.paymentMethod === "sinpe" && !process.env.SINPE_MOBILE_NUMBER) return NextResponse.json({ error: "SINPE Móvil todavía no está configurado. Intenta de nuevo más tarde o contáctanos." }, { status: 503 });
   const variantIds = value.items.flatMap(item => item.variantId ? [item.variantId] : []);
   const rows = variantIds.length ? await db.select({ id: productVariants.id, productId: productVariants.productId, name: products.name, price: productVariants.price, available: productVariants.available, stock: productVariants.stockOnHand }).from(productVariants).innerJoin(products, eq(products.id, productVariants.productId)).where(and(inArray(productVariants.id, variantIds), eq(products.status, "active"))) : [];
   const byVariant = new Map(rows.map(row => [row.id, row]));
