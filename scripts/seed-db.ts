@@ -1,6 +1,6 @@
 import { eq, sql } from "drizzle-orm";
 import { db, pool } from "../db/client";
-import { categories, comboItems, combos, galleryImages, galleryItems, mediaAssets, productComplementRecommendations, productImages, products, productVariants, services, testimonials } from "../db/schema";
+import { categories, comboItems, combos, galleryImages, galleryItems, mediaAssets, productComplementRecommendations, productImages, products, productVariants, services, siteSettings, testimonials } from "../db/schema";
 
 const categorySeeds = [
   { slug: "rosas", name: "Rosas", sortOrder: 0 },
@@ -38,9 +38,13 @@ async function main() {
       { slug: "rosas-de-amor", name: "Rosas de Amor", type: "floral", category: "rosas", image: "seed/rosas", price: 30000, description: "Un gesto clásico que siempre emociona" },
       { slug: "luz-de-primavera", name: "Luz de Primavera", type: "floral", category: "girasoles", image: "seed/girasoles", price: 26000, description: "Color y calidez para celebrar" },
       { slug: "jardin-rosado", name: "Jardín Rosado", type: "floral", category: "mixtos", image: "seed/jardin", price: 32000, description: "Una composición delicada y natural" },
+      { slug: "amanecer-tropical", name: "Amanecer Tropical", type: "floral", category: "mixtos", image: "seed/jardin", price: 38000, description: "Heliconias, jengibre y follajes tropicales para un regalo vibrante" },
+      { slug: "susurro-blanco", name: "Susurro Blanco", type: "floral", category: "mixtos", image: "seed/aurora", price: 42000, description: "Lirios, rosas blancas y eucalipto para momentos de calma y gratitud" },
+      { slug: "detalle-de-girasoles", name: "Detalle de Girasoles", type: "floral", category: "girasoles", image: "seed/girasoles", price: 18500, description: "Un arreglo compacto y luminoso para alegrar cualquier día" },
       { slug: "tarjeta-dedicatoria", name: "Tarjeta de dedicatoria", type: "complement", category: "complementos", image: null, price: 2500, description: "Tarjeta para acompañar un arreglo" },
       { slug: "chocolates-artesanales", name: "Chocolates artesanales", type: "complement", category: "complementos", image: null, price: 7500, description: "Caja de chocolates para acompañar el regalo" },
       { slug: "globo-celebracion", name: "Globo de celebración", type: "complement", category: "complementos", image: null, price: 4500, description: "Globo para cumpleaños y celebraciones" },
+      { slug: "vela-aromatica", name: "Vela aromática", type: "complement", category: "complementos", image: null, price: 8500, description: "Vela de soya con aroma floral y presentación de regalo" },
       { slug: "termo-personalizado", name: "Termo personalizado", type: "personalized", category: "personalizados", image: null, price: 12000, description: "Detalle personalizado de muestra" },
     ] as const;
     const productIds = new Map<string,string>();
@@ -66,6 +70,8 @@ async function main() {
     }
     const [gallery] = await tx.insert(galleryItems).values({ slug: "inspiracion-boda-rosada", title: "Inspiración para boda rosada", categoryId: categoryIds.get("bodas"), description: "Composición floral de muestra", featured: true }).onConflictDoUpdate({ target: galleryItems.slug, set: { title: "Inspiración para boda rosada", updatedAt: sql`now()` } }).returning({ id: galleryItems.id });
     await tx.insert(galleryImages).values({ galleryItemId: gallery.id, mediaAssetId: imageIds.get("seed/boda")! }).onConflictDoNothing({ target: [galleryImages.galleryItemId, galleryImages.mediaAssetId] });
+    const business = { email: "hola@orosblooms.demo", phone: "+506 7000 1234", whatsapp: "50670001234", instagram: "https://instagram.com/orosblooms.demo", facebook: "https://facebook.com/orosblooms.demo", hours: "Lunes a sábado, 9:00 a. m. a 6:00 p. m.", hoursEn: "Monday through Saturday, 9:00 a.m. to 6:00 p.m.", hoursEs: "Lunes a sábado, 9:00 a. m. a 6:00 p. m.", deliveryArea: "San José, Heredia y zonas cercanas", deliveryNotice: "Los pedidos con entrega se confirman según ruta y disponibilidad.", deliveryNoticeEn: "Delivery orders are confirmed based on route and availability.", deliveryNoticeEs: "Los pedidos con entrega se confirman según ruta y disponibilidad.", depositPercent: 50, cancellationPolicy: "Datos de demostración: política pendiente de definir por el negocio.", cancellationPolicyEn: "Demo data: policy to be defined by the business.", cancellationPolicyEs: "Datos de demostración: política pendiente de definir por el negocio.", privacyRetention: "Datos de demostración.", privacyRetentionEn: "Demo data.", privacyRetentionEs: "Datos de demostración." };
+    await tx.insert(siteSettings).values({ key: "business", value: business }).onConflictDoUpdate({ target: siteSettings.key, set: { value: business, updatedAt: sql`now()` } });
 
     // El testimonio ficticio permanece sin aprobar para que nunca aparezca como reseña real.
     const existing = await tx.select({ id: testimonials.id }).from(testimonials).where(eq(testimonials.displayName, "Ejemplo ficticio")).limit(1);
