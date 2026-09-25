@@ -7,14 +7,18 @@ import { type HomepageSectionKey } from "@/lib/homepage";
 import type { Metadata } from "next";
 import { getLocale } from "@/lib/i18n";
 import { getBrandingSettings } from "@/lib/branding";
+import { getHeroCopy } from "@/lib/hero-copy";
+import { listProducts } from "@/services/catalog";
 
 export const metadata: Metadata = { title: "Flores para cada historia", alternates: { canonical: "/" } };
 
 export default async function HomePage() {
-  const [locale, branding, configured] = await Promise.all([
+  const [locale, branding, heroCopy, configured, catalogProducts] = await Promise.all([
     getLocale(),
     getBrandingSettings(),
+    getHeroCopy(),
     db.select().from(homepageSections).orderBy(asc(homepageSections.sortOrder)),
+    listProducts(),
   ]);
   const now = new Date();
   const settings = new Map(configured.map((item) => [item.key, item]));
@@ -24,9 +28,9 @@ export default async function HomePage() {
   };
   const content = (key: HomepageSectionKey) => settings.get(key)?.content;
 
-  return <div className="home-page"><main id="main-content"><HomeHero locale={locale} branding={branding}/>
+  return <div className="home-page"><main id="main-content"><HomeHero locale={locale} branding={branding} copy={heroCopy}/>
     {visible("categories") && <HomeCategories locale={locale} content={content("categories")}/>}
-    {visible("featuredEditorial") && <FeaturedProductsSection locale={locale} content={content("featuredEditorial")}/>}
+    {visible("featuredEditorial") && <FeaturedProductsSection locale={locale} content={content("featuredEditorial")} products={catalogProducts.filter(product=>product.featured).slice(0,4)}/>}
     {visible("giftAddons") && <GiftAddonsSection locale={locale} content={content("giftAddons")}/>}
     {visible("story") && <HomeStory locale={locale} content={content("story")}/>}
   </main></div>;

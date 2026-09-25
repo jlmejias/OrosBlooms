@@ -3,8 +3,8 @@ import test from "node:test";
 import { cartTotal, removeCartItem, toggleFavorite, updateCartQuantity, type StoreItem } from "../lib/store.ts";
 
 const cart: StoreItem[] = [
-  { productId: "1", slug: "rosas", name: "Rosas", price: 12000, quantity: 2 },
-  { productId: "2", slug: "lirios", name: "Lirios", price: 9000, quantity: 1 },
+  { kind: "product", productId: "1", slug: "rosas", name: "Rosas", price: 12000, quantity: 2 },
+  { kind: "product", productId: "2", slug: "lirios", name: "Lirios", price: 9000, quantity: 1 },
 ];
 
 test("favoritos se agregan y eliminan sin duplicados", () => {

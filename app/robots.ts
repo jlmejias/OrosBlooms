@@ -3,7 +3,7 @@ import { absoluteUrl } from "@/lib/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/admin/", "/acceso-admin", "/api/"] },
+    rules: { userAgent: "*", allow: "/", disallow: ["/admin", "/admin/", "/acceso-admin", "/api/"] },
     sitemap: absoluteUrl("/sitemap.xml"),
     host: absoluteUrl(),
   };

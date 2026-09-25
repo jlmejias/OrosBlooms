@@ -16,7 +16,8 @@ export function HeroMedia({ mobile = false, videoUrl, imageUrl, imageAlt }: Hero
     const viewport = window.matchMedia("(max-width: 1023px)");
     let loadTimer: number | undefined;
     const update = () => {
-      const matchesViewport = mobile ? viewport.matches : !viewport.matches;
+      // La variante móvil usa exclusivamente el poster para no descargar un video de ~20 MB.
+      const matchesViewport = !mobile && !viewport.matches;
       window.clearTimeout(loadTimer);
       if (!motion.matches && matchesViewport) {
         loadTimer = window.setTimeout(() => setLoadVideo(true), 900);

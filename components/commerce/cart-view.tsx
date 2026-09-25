@@ -25,7 +25,7 @@ export function CartView({ locale }: { locale: Locale }) {
         <h2>{es ? "Tu pedido" : "Your order"}</h2>
         <span>{cart.length} {cart.length === 1 ? (es ? "producto" : "item") : (es ? "productos" : "items")}</span>
       </div>
-      {cart.map((item, index) => <article className="cart-row" key={`${item.slug}-${item.variantId}-${index}`}>
+      {cart.map((item, index) => <article className="cart-row" key={`${item.slug}-${item.kind === "product" ? item.variantId ?? item.productId : item.comboId}-${index}`}>
         <div className="cart-row-image"><Image src={item.image ?? "/home-hero.webp"} alt={item.name} fill sizes="(max-width: 600px) 92px, 120px"/></div>
         <div className="cart-row-copy">
           <p className="cart-row-eyebrow">{es ? "Selección floral" : "Floral selection"}</p>

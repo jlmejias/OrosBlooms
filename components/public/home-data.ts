@@ -1,10 +1,10 @@
 export const categories = [
-  { title: "Ramos de novia", image: "/bouquet-editorial.png", alt: "Ramo de novia en tonos rosados y crema", target: "bodas" },
-  { title: "Cumpleaños", image: "/home-sunflowers.webp", alt: "Ramo de girasoles amarillos", target: "flores" },
-  { title: "Amor y aniversario", image: "/home-roses.webp", alt: "Ramo de rosas rojas", target: "flores" },
-  { title: "Eventos", image: "/home-wedding.webp", alt: "Decoración floral para ceremonia", target: "eventos" },
-  { title: "Condolencias", image: "/bouquet-editorial.png", alt: "Arreglo floral en tonos suaves", target: "flores" },
-  { title: "Personalizados", image: "/home-hero.webp", alt: "Rosas rosadas y flores blancas", target: "personalizados" },
+  { title: "Ramos de novia", image: "/bouquet-editorial.png", alt: "Ramo de novia en tonos rosados y crema", target: "/bodas" },
+  { title: "Cumpleaños", image: "/home-sunflowers.webp", alt: "Ramo de girasoles amarillos", target: "/flores" },
+  { title: "Amor y aniversario", image: "/home-roses.webp", alt: "Ramo de rosas rojas", target: "/flores" },
+  { title: "Eventos", image: "/home-wedding.webp", alt: "Decoración floral para ceremonia", target: "/eventos" },
+  { title: "Condolencias", image: "/bouquet-editorial.png", alt: "Arreglo floral en tonos suaves", target: "/flores" },
+  { title: "Personalizados", image: "/home-hero.webp", alt: "Rosas rosadas y flores blancas", target: "/personalizados" },
 ] as const;
 
 export const featuredProducts = [

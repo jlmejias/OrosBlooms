@@ -1,6 +1,12 @@
 import { eq, sql } from "drizzle-orm";
-import { db, pool } from "../db/client";
-import { categories, comboItems, combos, galleryImages, galleryItems, mediaAssets, productComplementRecommendations, productImages, products, productVariants, services, siteSettings, testimonials } from "../db/schema";
+import { drizzle } from "drizzle-orm/node-postgres";
+import nextEnv from "@next/env";
+import pg from "pg";
+import { categories, comboItems, combos, customers, galleryImages, galleryItems, mediaAssets, productComplementRecommendations, productImages, products, productVariants, services, siteSettings, testimonials } from "../db/schema/index.ts";
+
+nextEnv.loadEnvConfig(process.cwd());
+if(!process.env.DATABASE_URL)throw new Error("DATABASE_URL es obligatoria.");
+const pool=new pg.Pool({connectionString:process.env.DATABASE_URL});const db=drizzle(pool);
 
 const categorySeeds = [
   { slug: "rosas", name: "Rosas", sortOrder: 0 },
@@ -48,7 +54,8 @@ async function main() {
       { slug: "termo-personalizado", name: "Termo personalizado", type: "personalized", category: "personalizados", image: null, price: 12000, description: "Detalle personalizado de muestra" },
     ] as const;
     const productIds = new Map<string,string>();
-    for (const item of productSeeds) {
+    const qaStocks=[0,1,2,10,10,10,10,10,10,10,10,10];
+    for (const [productIndex,item] of productSeeds.entries()) {
       const [product] = await tx.insert(products).values({ slug: item.slug, name: item.name, type: item.type, categoryId: categoryIds.get(item.category), shortDescription: item.description, basePrice: item.price, priceLabel: "Desde", status: "active", featured: item.type === "floral", customizable: item.type === "personalized" }).onConflictDoUpdate({ target: products.slug, set: { name: item.name, type: item.type, categoryId: categoryIds.get(item.category), shortDescription: item.description, basePrice: item.price, status: "active", updatedAt: sql`now()` } }).returning({ id: products.id });
       productIds.set(item.slug,product.id);
       if (item.image) {
@@ -56,7 +63,8 @@ async function main() {
         await tx.insert(productImages).values({ productId: product.id, mediaAssetId, primary: true }).onConflictDoNothing({ target: [productImages.productId, productImages.mediaAssetId] });
       }
       const existingVariants = await tx.select({ id: productVariants.id }).from(productVariants).where(eq(productVariants.productId, product.id)).limit(1);
-      if (existingVariants.length === 0) await tx.insert(productVariants).values({ productId: product.id, name: "Estándar", price: item.price });
+      if (existingVariants.length === 0) await tx.insert(productVariants).values({ productId: product.id, name: "Estándar", price: item.price, stockOnHand:qaStocks[productIndex] });
+      else await tx.update(productVariants).set({price:item.price,stockOnHand:qaStocks[productIndex],available:true,updatedAt:sql`now()`}).where(eq(productVariants.id,existingVariants[0].id));
     }
     for(const floralSlug of ["ramo-aurora","rosas-de-amor","luz-de-primavera","jardin-rosado"]){for(const[sortOrder,complementSlug]of["tarjeta-dedicatoria","chocolates-artesanales","globo-celebracion"].entries()){await tx.insert(productComplementRecommendations).values({floralProductId:productIds.get(floralSlug)!,complementProductId:productIds.get(complementSlug)!,sortOrder}).onConflictDoNothing();}}
     const[combo]=await tx.insert(combos).values({slug:"celebracion-luminosa",name:"Celebración luminosa",description:"Girasoles, chocolates y tarjeta para celebrar.",imageUrl:"/home-sunflowers.webp",price:36000,promotionalPrice:34000,featured:true,active:true}).onConflictDoUpdate({target:combos.slug,set:{name:"Celebración luminosa",description:"Girasoles, chocolates y tarjeta para celebrar.",imageUrl:"/home-sunflowers.webp",price:36000,promotionalPrice:34000,featured:true,active:true,updatedAt:sql`now()`}}).returning({id:combos.id});
@@ -65,12 +73,15 @@ async function main() {
     for (const item of [
       { slug: "bodas", name: "Flores para bodas", type: "wedding", image: "seed/boda", sortOrder: 0 },
       { slug: "eventos", name: "Diseño floral para eventos", type: "event", image: "seed/jardin", sortOrder: 1 },
+      { slug: "personalizado", name: "Diseño floral personalizado", type: "custom", image: "seed/aurora", sortOrder: 2 },
     ]) {
       await tx.insert(services).values({ slug: item.slug, name: item.name, type: item.type, imageId: imageIds.get(item.image), sortOrder: item.sortOrder }).onConflictDoUpdate({ target: services.slug, set: { name: item.name, type: item.type, imageId: imageIds.get(item.image), updatedAt: sql`now()` } });
     }
     const [gallery] = await tx.insert(galleryItems).values({ slug: "inspiracion-boda-rosada", title: "Inspiración para boda rosada", categoryId: categoryIds.get("bodas"), description: "Composición floral de muestra", featured: true }).onConflictDoUpdate({ target: galleryItems.slug, set: { title: "Inspiración para boda rosada", updatedAt: sql`now()` } }).returning({ id: galleryItems.id });
     await tx.insert(galleryImages).values({ galleryItemId: gallery.id, mediaAssetId: imageIds.get("seed/boda")! }).onConflictDoNothing({ target: [galleryImages.galleryItemId, galleryImages.mediaAssetId] });
-    const business = { email: "hola@orosblooms.demo", phone: "+506 7000 1234", whatsapp: "50670001234", instagram: "https://instagram.com/orosblooms.demo", facebook: "https://facebook.com/orosblooms.demo", hours: "Lunes a sábado, 9:00 a. m. a 6:00 p. m.", hoursEn: "Monday through Saturday, 9:00 a.m. to 6:00 p.m.", hoursEs: "Lunes a sábado, 9:00 a. m. a 6:00 p. m.", deliveryArea: "San José, Heredia y zonas cercanas", deliveryNotice: "Los pedidos con entrega se confirman según ruta y disponibilidad.", deliveryNoticeEn: "Delivery orders are confirmed based on route and availability.", deliveryNoticeEs: "Los pedidos con entrega se confirman según ruta y disponibilidad.", depositPercent: 50, cancellationPolicy: "Datos de demostración: política pendiente de definir por el negocio.", cancellationPolicyEn: "Demo data: policy to be defined by the business.", cancellationPolicyEs: "Datos de demostración: política pendiente de definir por el negocio.", privacyRetention: "Datos de demostración.", privacyRetentionEn: "Demo data.", privacyRetentionEs: "Datos de demostración." };
+    for(const[itemIndex,item]of[{slug:"inspiracion-girasoles",title:"Celebración con girasoles",image:"seed/girasoles"},{slug:"inspiracion-jardin",title:"Jardín romántico",image:"seed/jardin"}].entries()){const[row]=await tx.insert(galleryItems).values({slug:item.slug,title:item.title,description:"Contenido de demostración QA",featured:false,sortOrder:itemIndex+1}).onConflictDoUpdate({target:galleryItems.slug,set:{title:item.title,updatedAt:sql`now()`}}).returning({id:galleryItems.id});await tx.insert(galleryImages).values({galleryItemId:row.id,mediaAssetId:imageIds.get(item.image)!}).onConflictDoNothing({target:[galleryImages.galleryItemId,galleryImages.mediaAssetId]});}
+    for(const item of [{identityKey:"qa.one@example.test|+50670000001",name:"Cliente QA Uno",email:"qa.one@example.test",phone:"+50670000001"},{identityKey:"qa.two@example.test|+50670000002",name:"Cliente QA Dos",email:"qa.two@example.test",phone:"+50670000002"}])await tx.insert(customers).values({...item,contactPreference:"email"}).onConflictDoUpdate({target:customers.identityKey,set:{name:item.name,email:item.email,phone:item.phone,updatedAt:sql`now()`}});
+    const business = { email: "hola@orosblooms.demo", phone: "+506 7000 1234", whatsapp: "50670001234", instagram: "https://instagram.com/orosblooms.demo", facebook: "https://facebook.com/orosblooms.demo", hours: "Lunes a sábado, 9:00 a. m. a 6:00 p. m.", hoursEn: "Monday through Saturday, 9:00 a.m. to 6:00 p.m.", hoursEs: "Lunes a sábado, 9:00 a. m. a 6:00 p. m.", deliveryArea: "San José, Heredia y zonas cercanas", deliveryNotice: "Los pedidos con entrega se confirman según ruta y disponibilidad.", deliveryNoticeEn: "Delivery orders are confirmed based on route and availability.", deliveryNoticeEs: "Los pedidos con entrega se confirman según ruta y disponibilidad.", deliveryFee: 3000, depositPercent: 50, cancellationPolicy: "Datos de demostración: política pendiente de definir por el negocio.", cancellationPolicyEn: "Demo data: policy to be defined by the business.", cancellationPolicyEs: "Datos de demostración: política pendiente de definir por el negocio.", privacyRetention: "Datos de demostración.", privacyRetentionEn: "Demo data.", privacyRetentionEs: "Datos de demostración." };
     await tx.insert(siteSettings).values({ key: "business", value: business }).onConflictDoUpdate({ target: siteSettings.key, set: { value: business, updatedAt: sql`now()` } });
 
     // El testimonio ficticio permanece sin aprobar para que nunca aparezca como reseña real.

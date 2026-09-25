@@ -29,6 +29,20 @@
       "when": 1790050000000,
       "tag": "0003_checkout_payments",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790251200000,
+      "tag": "0004_checkout_integrity",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790254800000,
+      "tag": "0005_abuse_identity_notifications",
+      "breakpoints": true
     }
   ]
 }

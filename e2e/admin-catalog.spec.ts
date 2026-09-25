@@ -1,0 +1,7 @@
+import { expect,test } from "@playwright/test";
+
+test("admin crea categoría y producto publicable que aparece en catálogo",async({page})=>{
+  await page.goto("/acceso-admin");await page.getByLabel("Correo").fill("admin@orosblooms.qa");await page.getByLabel("Contraseña").fill("QaAdmin2026!");await page.getByRole("button",{name:"Ingresar"}).click();await expect(page).toHaveURL(/\/admin$/);
+  await page.goto("/admin/productos");await page.getByLabel("Nombre").fill("Ramo QA E2E");await page.getByLabel("Identificador URL").fill("ramo-qa-e2e");await page.getByLabel("Precio").fill("24500");await page.getByRole("button",{name:"Nueva categoría"}).click();const dialog=page.getByRole("dialog",{name:"Nueva categoría"});await dialog.getByLabel("Nombre de categoría").fill("QA Temporal");await dialog.getByRole("button",{name:"Crear y seleccionar"}).click();await expect(dialog).toBeHidden();await expect(page.getByLabel("Nombre")).toHaveValue("Ramo QA E2E");await expect(page.getByLabel("Precio")).toHaveValue("24500");await expect(page.getByLabel("Categoría")).toHaveValue(/.+/);await page.getByLabel("Tipo").selectOption("floral");await page.getByLabel("Estado").selectOption("active");await page.getByLabel("Descripción").fill("Producto creado por la suite E2E");await page.getByLabel("URL de imagen").fill("/home-hero.webp");await page.getByRole("button",{name:"Crear producto"}).click();
+  await page.goto("/flores/ramo-qa-e2e");await expect(page.getByRole("heading",{name:"Ramo QA E2E"})).toBeVisible();await expect(page.locator(".detail-price")).toContainText("24");
+});

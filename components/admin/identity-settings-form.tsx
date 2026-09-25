@@ -4,7 +4,7 @@ import { DeleteOutlined, DesktopOutlined, EditOutlined, MobileOutlined, PictureO
 import { App, Button, Collapse, ColorPicker, Input as AntInput, Segmented, Tabs, Typography } from "antd";
 import { useFormik } from "formik";
 import Image from "next/image";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as yup from "yup";
 import { saveBrandingSettings } from "@/app/admin/actions";
 type BrandingSettings={brandName:string;logoUrl:string;logoAltEs:string;logoAltEn:string;faviconUrl:string;heroVideoUrl:string;heroImageUrl:string;heroImageAltEs:string;heroImageAltEn:string;backgroundColor:string;foregroundColor:string;primaryColor:string;accentColor:string;softAccentColor:string};
@@ -22,6 +22,7 @@ function detectMode(value:BrandingSettings):HeroMode{return youtubeEmbedUrl(valu
 
 export function IdentitySettingsForm({value}:{value:BrandingSettings}){
   const {message}=App.useApp();const [files,setFiles]=useState<Partial<Record<FileKey,File>>>({});const [tab,setTab]=useState("brand");const [preview,setPreview]=useState<"desktop"|"mobile">("desktop");const [heroMode,setHeroMode]=useState<HeroMode>(detectMode(value));const [saving,setSaving]=useState(false);const inputs=useRef<Partial<Record<FileKey,HTMLInputElement|null>>>({});
+  useEffect(()=>{window.dispatchEvent(new CustomEvent("identity-tab-change",{detail:tab}));},[tab]);
   const formik=useFormik({initialValues:value,validationSchema:schema,onSubmit:async values=>{setSaving(true);try{const data=new FormData();Object.entries(values).forEach(([key,entry])=>data.set(key,entry));Object.entries(files).forEach(([key,file])=>data.set(key,file));await saveBrandingSettings(data);message.success("Cambios publicados correctamente.");}catch(error){message.error(error instanceof Error?error.message:"No se pudo publicar.");}finally{setSaving(false);}}});
   const previews=useMemo(()=>Object.fromEntries(Object.entries(files).map(([key,file])=>[key,URL.createObjectURL(file)])) as Partial<Record<FileKey,string>>,[files]);const logoSrc=previews.logo??formik.values.logoUrl;const faviconSrc=previews.favicon??formik.values.faviconUrl;const heroImage=previews.heroImage??formik.values.heroImageUrl;const heroVideo=previews.heroVideo??formik.values.heroVideoUrl;const youtubeUrl=youtubeEmbedUrl(heroVideo);const dirty=formik.dirty||Object.keys(files).length>0;
   const rules:Record<FileKey,{types:string[];max:number;label:string}>={logo:{types:["image/png","image/webp","image/svg+xml"],max:8_000_000,label:"PNG, WebP o SVG · máximo 8 MB"},favicon:{types:["image/png","image/x-icon","image/vnd.microsoft.icon","image/svg+xml"],max:2_000_000,label:"PNG, ICO o SVG · máximo 2 MB"},heroImage:{types:["image/jpeg","image/png","image/webp"],max:12_000_000,label:"JPG, PNG o WebP · máximo 12 MB"},heroVideo:{types:["video/mp4","video/webm"],max:40_000_000,label:"MP4 o WebM · máximo 40 MB"}};

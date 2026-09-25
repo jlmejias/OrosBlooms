@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, ilike, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { categories, comboItems, combos, mediaAssets, productComplementRecommendations, productImages, products, productVariants, services } from "@/db/schema";
 
@@ -32,12 +32,20 @@ export async function getProduct(slug: string) {
 export async function listCombos() {
   const now = new Date();
   const activeCombos = await db.select().from(combos).where(and(eq(combos.active, true), or(sql`${combos.startsAt} IS NULL`, sql`${combos.startsAt} <= ${now}`), or(sql`${combos.endsAt} IS NULL`, sql`${combos.endsAt} >= ${now}`))).orderBy(desc(combos.featured), asc(combos.name));
-  return Promise.all(activeCombos.map(async combo => ({ ...combo, items: await db.select({ productId: comboItems.productId, quantity: comboItems.quantity, name: products.name }).from(comboItems).innerJoin(products, eq(comboItems.productId, products.id)).where(eq(comboItems.comboId, combo.id)) })));
+  if (!activeCombos.length) return [];
+  const rows = await db.select({ comboId: comboItems.comboId, productId: comboItems.productId, quantity: comboItems.quantity, name: products.name }).from(comboItems).innerJoin(products, eq(comboItems.productId, products.id)).where(inArray(comboItems.comboId, activeCombos.map(combo => combo.id)));
+  const grouped = new Map<string, Array<{ productId: string; quantity: number; name: string }>>();
+  for (const row of rows) grouped.set(row.comboId, [...(grouped.get(row.comboId) ?? []), { productId: row.productId, quantity: row.quantity, name: row.name }]);
+  return activeCombos.map(combo => ({ ...combo, items: grouped.get(combo.id) ?? [] }));
 }
 
 export async function listGiftProducts() {
   const flowers = await listProducts();
-  return Promise.all(flowers.map(async product => ({ ...product, variants: await db.select({ id: productVariants.id, name: productVariants.name, price: productVariants.price }).from(productVariants).where(and(eq(productVariants.productId, product.id), eq(productVariants.available, true))).orderBy(asc(productVariants.sortOrder)) })));
+  if (!flowers.length) return [];
+  const variants = await db.select({ id: productVariants.id, productId: productVariants.productId, name: productVariants.name, price: productVariants.price }).from(productVariants).where(and(inArray(productVariants.productId, flowers.map(product => product.id)), eq(productVariants.available, true))).orderBy(asc(productVariants.sortOrder));
+  const grouped = new Map<string, typeof variants>();
+  for (const variant of variants) grouped.set(variant.productId, [...(grouped.get(variant.productId) ?? []), variant]);
+  return flowers.map(product => ({ ...product, variants: (grouped.get(product.id) ?? []).map(({ id, name, price }) => ({ id, name, price })) }));
 }
 
 export async function searchSite(query: string) {

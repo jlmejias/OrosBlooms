@@ -13,8 +13,9 @@ export function FavoriteButton({ slug, locale="en" }: { slug: string; locale?:Lo
 
 type Complement = { id: string; slug: string; name: string; basePrice: number; image?: string | null };
 
-export function ProductPurchase({ product, variants, complements = [] }: { product: Omit<StoreItem, "quantity" | "variantId">; variants: { id: string; name: string; price: number }[]; complements?: Complement[] }) {
+export function ProductPurchase({ product, variants, complements = [], locale = "es" }: { product: Omit<Extract<StoreItem, { kind: "product" }>, "quantity" | "variantId">; variants: { id: string; name: string; price: number }[]; complements?: Complement[]; locale?: Locale }) {
   const { addItem } = useStore();
+  const es = locale === "es";
   const [variantId, setVariantId] = useState(variants[0]?.id ?? "");
   const [personalization, setPersonalization] = useState("");
   const [selectedComplements, setSelectedComplements] = useState<string[]>([]);
@@ -22,13 +23,13 @@ export function ProductPurchase({ product, variants, complements = [] }: { produ
   const total = (selected?.price ?? product.price) + complements.filter(item => selectedComplements.includes(item.id)).reduce((sum, item) => sum + item.basePrice, 0);
   const addSelection = () => {
     addItem({ ...product, variantId: selected?.id, price: selected?.price ?? product.price, quantity: 1, personalization });
-    complements.filter(item => selectedComplements.includes(item.id)).forEach(item => addItem({ productId: item.id, slug: item.slug, name: item.name, price: item.basePrice, image: item.image, quantity: 1 }));
+    complements.filter(item => selectedComplements.includes(item.id)).forEach(item => addItem({ kind: "product", productId: item.id, slug: item.slug, name: item.name, price: item.basePrice, image: item.image, quantity: 1 }));
   };
   return <div className="purchase-box">
-    {variants.length > 0 && <label>Tamaño o presentación<select value={variantId} onChange={event => setVariantId(event.target.value)}>{variants.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>}
-    {complements.length > 0 && <fieldset className="complement-options"><legend>Complementos recomendados</legend>{complements.map(item => <label key={item.id}><input type="checkbox" checked={selectedComplements.includes(item.id)} onChange={() => setSelectedComplements(current => current.includes(item.id) ? current.filter(id => id !== item.id) : [...current, item.id])}/><span>{item.name}</span><strong>{formatCRC(item.basePrice)}</strong></label>)}</fieldset>}
-    <label>Dedicatoria o indicaciones<textarea value={personalization} onChange={event => setPersonalization(event.target.value)} placeholder="Opcional" maxLength={400} /></label>
-    <p className="purchase-total">Total estimado <strong>{formatCRC(total)}</strong></p>
-    <button className="commerce-primary" type="button" onClick={addSelection}>Agregar selección al carrito</button>
+    {variants.length > 0 && <label>{es?"Tamaño o presentación":"Size or presentation"}<select value={variantId} onChange={event => setVariantId(event.target.value)}>{variants.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>}
+    {complements.length > 0 && <fieldset className="complement-options"><legend>{es?"Complementos recomendados":"Recommended extras"}</legend>{complements.map(item => <label key={item.id}><input type="checkbox" checked={selectedComplements.includes(item.id)} onChange={() => setSelectedComplements(current => current.includes(item.id) ? current.filter(id => id !== item.id) : [...current, item.id])}/><span>{item.name}</span><strong>{formatCRC(item.basePrice)}</strong></label>)}</fieldset>}
+    <label>{es?"Dedicatoria o indicaciones":"Message or instructions"}<textarea value={personalization} onChange={event => setPersonalization(event.target.value)} placeholder={es?"Opcional":"Optional"} maxLength={400} /></label>
+    <p className="purchase-total">{es?"Total estimado":"Estimated total"} <strong>{formatCRC(total)}</strong></p>
+    <button className="commerce-primary" type="button" onClick={addSelection}>{es?"Agregar selección al carrito":"Add selection to cart"}</button>
   </div>;
 }

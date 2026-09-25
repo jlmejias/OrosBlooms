@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { loadEnvConfig } from "@next/env";
+import nextEnv from "@next/env";
 
-loadEnvConfig(process.cwd());
+nextEnv.loadEnvConfig(process.cwd());
 
 const serverSchema = z.object({
   DATABASE_URL: z.url().startsWith("postgresql://").or(z.url().startsWith("postgres://")),

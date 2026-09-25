@@ -74,7 +74,7 @@ button { cursor: pointer; }
 .hide-scrollbar { scrollbar-width: none; }
 .hide-scrollbar::-webkit-scrollbar { display: none; }
 
-.form-label-text{display:flex;align-items:center;gap:.25rem}.form-required-mark{color:var(--danger);font-weight:800}.form-field-error{display:block;margin-top:.35rem;color:var(--danger);font-size:.75rem;font-weight:600;line-height:1.35}.form-field-error::before{content:"! ";font-weight:800}input[aria-invalid="true"],textarea[aria-invalid="true"],select[aria-invalid="true"],.ant-input[aria-invalid="true"]{border-color:var(--danger)!important;box-shadow:0 0 0 2px rgb(161 63 70 / 10%)!important}.form-label-required{position:relative}
+label:has(>input[required],>textarea[required],>select[required]){position:relative}label:has(>input[required],>textarea[required],>select[required])::after{content:"*";position:absolute;top:0;right:0;color:var(--danger);font-weight:800}.form-field-error{display:block;margin-top:.35rem;color:var(--danger);font-size:.75rem;font-weight:600;line-height:1.35}.form-field-error::before{content:"! ";font-weight:800}input[aria-invalid="true"],textarea[aria-invalid="true"],select[aria-invalid="true"],.ant-input[aria-invalid="true"]{border-color:var(--danger)!important;box-shadow:0 0 0 2px rgb(161 63 70 / 10%)!important}
 
 .motion-ready .reveal-target { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s cubic-bezier(.22, 1, .36, 1); }
 .motion-ready .reveal-target.is-revealed { opacity: 1; transform: none; }

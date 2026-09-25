@@ -36,8 +36,7 @@
 .home-search-desktop:hover { border-color: var(--olive); }
 .home-icon-button { display: inline-flex; width: 44px; height: 44px; flex: none; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: transparent; color: var(--foreground); }
 .home-menu-trigger { display: none; }
-.home-icon-button:hover:not(.home-deferred) { background: var(--cream); }
-.home-deferred { color: var(--muted); opacity: .65; cursor: default; }
+.home-icon-button:hover { background: var(--cream); }
 .home-mobile-search, .home-mobile-bag, .home-mobile-menu, .home-bottom-nav { display: none; }
 
 .home-hero { background: var(--cream); }
@@ -162,11 +161,16 @@
 .home-final-cta p:not(.home-eyebrow) { max-width: 560px; margin: 1.5rem auto 2rem; color: rgb(255 255 255 / 85%); line-height: 1.65; }
 .home-footer { padding: 4rem 0 1.5rem; background: #30352d; color: white; }
 .home-footer-main { display: flex; justify-content: space-between; gap: 3rem; padding-bottom: 4rem; }
-.home-footer-brand { color: white; font-family: var(--font-display); font-size: 2.2rem; font-weight: 700; letter-spacing: -.05em; text-decoration: none; }
-.home-footer-brand span { color: var(--blush); font-family: var(--font-body); font-weight: 400; }
+.home-footer-brand { display: block; width: fit-content; text-decoration: none; }
+.home-footer-brand img { display: block; width: min(228px, 58vw); height: auto; filter: brightness(0) invert(1); }
 .home-footer-main p { margin-top: .8rem; font-family: var(--font-display); font-size: 1.3rem; }
 .home-footer-main small { display: block; margin-top: 1rem; color: #d8d9d2; }
 .home-footer-contact { display: block; width: fit-content; margin-top: .65rem; color: white; font-size: .82rem; }
+.home-footer-socials { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: 1.2rem; }
+.home-footer-socials a { display: inline-flex; align-items: center; gap: .45rem; min-height: 38px; padding: .45rem .75rem; border: 1px solid rgb(255 255 255 / 28%); border-radius: 999px; color: white; font-size: .76rem; text-decoration: none; transition: background-color .2s ease, border-color .2s ease, transform .2s ease; }
+.home-footer-socials a:hover { border-color: rgb(255 255 255 / 62%); background: rgb(255 255 255 / 10%); transform: translateY(-1px); }
+.home-footer-socials a:focus-visible { outline: 2px solid white; outline-offset: 3px; }
+.home-footer-whatsapp { display: grid; width: 19px; height: 19px; place-items: center; border: 1.5px solid currentColor; border-radius: 50%; font-size: .65rem; font-weight: 800; }
 .home-footer-main nav { display: grid; grid-template-columns: repeat(2, auto); align-content: start; gap: .8rem 3rem; }
 .home-footer-main nav a { color: white; font-size: .84rem; text-decoration: none; }
 .home-footer-main nav a:hover { text-decoration: underline; }
@@ -178,7 +182,6 @@
 }
 
 @media (max-width: 1279px) and (min-width: 1024px) {
-  .home-header-actions .home-deferred { display: none; }
 }
 
 /* El encabezado de escritorio no cabe de forma fiable con todos sus enlaces

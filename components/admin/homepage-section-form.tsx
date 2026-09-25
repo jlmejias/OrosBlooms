@@ -1,68 +1,26 @@
 "use client";
 
 import { App, Button, Checkbox, Form, Input } from "antd";
+import Image from "next/image";
 import { useFormik } from "formik";
+import { useEffect, useRef, useState } from "react";
 import * as yup from "yup";
-import { saveHomepageSection } from "@/app/admin/actions";
+import { saveHomepageSection, uploadHomepageSectionImage } from "@/app/admin/actions";
 import { homepageSectionDefaults, type HomepageSectionKey } from "@/lib/homepage";
 
-type Content = { titleEs?: string; titleEn?: string; subtitleEs?: string; subtitleEn?: string };
+type Content = { titleEs?: string; titleEn?: string; subtitleEs?: string; subtitleEn?: string; images?: string[] };
 type Section = { id?: string; key: HomepageSectionKey; visible?: boolean; content?: Record<string, unknown> };
+const imageUrl=yup.string().trim().required("Indica una imagen o selecciona un archivo").test("image-url","Usa una ruta local (/uploads/...) o una URL http(s) válida",value=>Boolean(value&&(/^(\/|https?:\/\/)/i.test(value))));
+const schema=yup.object({titleEs:yup.string().trim().required("Escribe el título en español"),titleEn:yup.string().trim().required("Escribe el título en inglés"),subtitleEs:yup.string().trim().required("Escribe el texto de apoyo en español"),subtitleEn:yup.string().trim().required("Escribe el texto de apoyo en inglés"),images:yup.array().of(imageUrl).required()});
 
-const schema = yup.object({
-  titleEs: yup.string().trim().required("Escribe el título en español"),
-  titleEn: yup.string().trim().required("Escribe el título en inglés"),
-  subtitleEs: yup.string().trim().required("Escribe el texto de apoyo en español"),
-  subtitleEn: yup.string().trim().required("Escribe el texto de apoyo en inglés"),
-});
-
-export function HomepageSectionForm({ section }: { section: Section }) {
-  const { message } = App.useApp();
-  const fallback = homepageSectionDefaults[section.key];
-  const content = section.content as Content | undefined;
-  const formik = useFormik({
-    enableReinitialize: true,
-    initialValues: {
-      titleEs: content?.titleEs ?? fallback.titleEs,
-      titleEn: content?.titleEn ?? fallback.titleEn,
-      subtitleEs: content?.subtitleEs ?? fallback.subtitleEs,
-      subtitleEn: content?.subtitleEn ?? fallback.subtitleEn,
-      visible: section.visible ?? true,
-    },
-    validationSchema: schema,
-    onSubmit: async (values) => {
-      try {
-        const data = new FormData();
-        if (section.id) data.set("id", section.id);
-        data.set("key", section.key);
-        data.set("sortOrder", String(fallback.sortOrder));
-        data.set("titleEs", values.titleEs);
-        data.set("titleEn", values.titleEn);
-        data.set("subtitleEs", values.subtitleEs);
-        data.set("subtitleEn", values.subtitleEn);
-        if (values.visible) data.set("visible", "on");
-        await saveHomepageSection(data);
-        message.success("Sección guardada. La portada ya está actualizada.");
-      } catch (error) {
-        message.error(error instanceof Error ? error.message : "No se pudo guardar la sección.");
-      }
-    },
-  });
-  const error = (name: keyof typeof formik.values) => formik.touched[name] && formik.errors[name] ? String(formik.errors[name]) : undefined;
-
-  return <form className="admin-form home-editor-form" onSubmit={formik.handleSubmit}>
-    <p className="admin-form-hint">Editando: <strong>{fallback.label}</strong></p>
-    <div className="home-editor-languages">
-      <section className="admin-form-section"><header><h3>Español</h3><p>Contenido que verá el sitio en español.</p></header>
-        <Form.Item label="Título" help={error("titleEs")} validateStatus={error("titleEs") ? "error" : ""}><Input value={formik.values.titleEs} onChange={(event) => formik.setFieldValue("titleEs", event.target.value)} /></Form.Item>
-        <Form.Item label="Texto de apoyo" help={error("subtitleEs")} validateStatus={error("subtitleEs") ? "error" : ""}><Input.TextArea rows={4} value={formik.values.subtitleEs} onChange={(event) => formik.setFieldValue("subtitleEs", event.target.value)} /></Form.Item>
-      </section>
-      <section className="admin-form-section"><header><h3>English</h3><p>Content shown when the site is in English.</p></header>
-        <Form.Item label="Title" help={error("titleEn")} validateStatus={error("titleEn") ? "error" : ""}><Input value={formik.values.titleEn} onChange={(event) => formik.setFieldValue("titleEn", event.target.value)} /></Form.Item>
-        <Form.Item label="Supporting text" help={error("subtitleEn")} validateStatus={error("subtitleEn") ? "error" : ""}><Input.TextArea rows={4} value={formik.values.subtitleEn} onChange={(event) => formik.setFieldValue("subtitleEn", event.target.value)} /></Form.Item>
-      </section>
-    </div>
-    <Checkbox checked={formik.values.visible} onChange={(event) => formik.setFieldValue("visible", event.target.checked)}>Mostrar esta sección en la portada</Checkbox>
-    <Button type="primary" htmlType="submit" loading={formik.isSubmitting}>Guardar sección</Button>
-  </form>;
+export function HomepageSectionForm({section}:{section:Section}){
+  const{message}=App.useApp();const fallback=homepageSectionDefaults[section.key];const content=section.content as Content|undefined;
+  const[files,setFiles]=useState<Record<number,{file:File;preview:string}>>({});
+  const previewUrls=useRef<Set<string>>(new Set());
+  useEffect(()=>()=>{for(const url of previewUrls.current)URL.revokeObjectURL(url)},[]);
+  const formik=useFormik({enableReinitialize:true,initialValues:{titleEs:content?.titleEs??fallback.titleEs,titleEn:content?.titleEn??fallback.titleEn,subtitleEs:content?.subtitleEs??fallback.subtitleEs,subtitleEn:content?.subtitleEn??fallback.subtitleEn,images:fallback.images.map((image,index)=>content?.images?.[index]||image),visible:section.visible??true},validationSchema:schema,onSubmit:async values=>{try{const images=[...values.images];for(const[index,selected]of Object.entries(files)){const position=Number(index);const upload=new FormData();upload.set("file",selected.file);upload.set("alt",fallback.imageLabels[position]);images[position]=await uploadHomepageSectionImage(upload);}const data=new FormData();if(section.id)data.set("id",section.id);data.set("key",section.key);data.set("sortOrder",String(fallback.sortOrder));data.set("titleEs",values.titleEs);data.set("titleEn",values.titleEn);data.set("subtitleEs",values.subtitleEs);data.set("subtitleEn",values.subtitleEn);images.forEach(image=>data.append("images",image));if(values.visible)data.set("visible","on");await saveHomepageSection(data);setFiles({});message.success("Sección e imágenes publicadas.");}catch(error){message.error(error instanceof Error?error.message:"No se pudo guardar la sección.");}}});
+  const error=(name:keyof typeof formik.values)=>formik.touched[name]&&formik.errors[name]?String(formik.errors[name]):undefined;
+  const imageError=(index:number)=>formik.touched.images&&Array.isArray(formik.errors.images)&&formik.errors.images[index]?String(formik.errors.images[index]):undefined;
+  const selectFile=(index:number,file?:File)=>{if(!file)return;if(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>12_000_000){message.error("Usa JPG, PNG o WebP de máximo 12 MB.");return;}const preview=URL.createObjectURL(file);previewUrls.current.add(preview);setFiles(current=>{const previous=current[index]?.preview;if(previous){URL.revokeObjectURL(previous);previewUrls.current.delete(previous);}return{...current,[index]:{file,preview}}});};
+  return <form className="admin-form home-editor-form" onSubmit={formik.handleSubmit}><p className="admin-form-hint">Editando: <strong>{fallback.label}</strong></p><div className="home-editor-languages"><section className="admin-form-section"><header><h3>Español</h3><p>Contenido que verá el sitio en español.</p></header><Form.Item label="Título" required help={error("titleEs")} validateStatus={error("titleEs")?"error":""}><Input value={formik.values.titleEs} placeholder="Escribe el título en español" onChange={event=>formik.setFieldValue("titleEs",event.target.value)}/></Form.Item><Form.Item label="Texto de apoyo" required help={error("subtitleEs")} validateStatus={error("subtitleEs")?"error":""}><Input.TextArea rows={4} value={formik.values.subtitleEs} placeholder="Escribe el texto de apoyo" onChange={event=>formik.setFieldValue("subtitleEs",event.target.value)}/></Form.Item></section><section className="admin-form-section"><header><h3>English</h3><p>Content shown when the site is in English.</p></header><Form.Item label="Title" required help={error("titleEn")} validateStatus={error("titleEn")?"error":""}><Input value={formik.values.titleEn} placeholder="Enter the English title" onChange={event=>formik.setFieldValue("titleEn",event.target.value)}/></Form.Item><Form.Item label="Supporting text" required help={error("subtitleEn")} validateStatus={error("subtitleEn")?"error":""}><Input.TextArea rows={4} value={formik.values.subtitleEn} placeholder="Enter the supporting text" onChange={event=>formik.setFieldValue("subtitleEn",event.target.value)}/></Form.Item></section></div><section className="admin-form-section homepage-images-editor"><header><h3>Imágenes de la sección</h3><p>Pega una URL o selecciona un archivo. El archivo seleccionado reemplaza la URL al guardar.</p></header><div className="homepage-images-grid">{fallback.imageLabels.map((label,index)=>{const src=files[index]?.preview||formik.values.images[index];const invalid=imageError(index);return <article key={`${section.key}-${index}`}><div className="homepage-image-preview">{src&&<Image src={src} alt={label} fill unoptimized/>}</div><strong>{label}</strong><Input status={invalid?"error":undefined} value={formik.values.images[index]} placeholder="/uploads/imagen.webp o https://..." onChange={event=>{const images=[...formik.values.images];images[index]=event.target.value;formik.setFieldValue("images",images);formik.setFieldTouched(`images[${index}]`,true,false)}}/>{invalid&&<small className="homepage-image-error">{invalid}</small>}<div className="homepage-image-actions"><label className="homepage-file-control">Cambiar archivo<input type="file" accept="image/jpeg,image/png,image/webp" onChange={event=>selectFile(index,event.currentTarget.files?.[0])}/></label><Button type="text" onClick={()=>{setFiles(current=>{const next={...current};const previous=next[index]?.preview;if(previous){URL.revokeObjectURL(previous);previewUrls.current.delete(previous);}delete next[index];return next});const images=[...formik.values.images];images[index]=fallback.images[index];formik.setFieldValue("images",images);formik.setFieldTouched(`images[${index}]`,false,false)}}>Restaurar</Button></div>{files[index]&&<small>{files[index].file.name}</small>}</article>})}</div></section><Checkbox checked={formik.values.visible} onChange={event=>formik.setFieldValue("visible",event.target.checked)}>Mostrar esta sección en la portada</Checkbox><Button type="primary" htmlType="submit" loading={formik.isSubmitting}>Guardar sección</Button></form>;
 }

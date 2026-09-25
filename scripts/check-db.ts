@@ -1,5 +1,11 @@
 import { sql } from "drizzle-orm";
-import { db, pool } from "../db/client";
+import { drizzle } from "drizzle-orm/node-postgres";
+import nextEnv from "@next/env";
+import pg from "pg";
+
+nextEnv.loadEnvConfig(process.cwd());
+if(!process.env.DATABASE_URL)throw new Error("DATABASE_URL es obligatoria.");
+const pool=new pg.Pool({connectionString:process.env.DATABASE_URL});const db=drizzle(pool);
 
 async function main() {
   const result = await db.execute(sql`select count(*)::int as count from foundation_checks`);

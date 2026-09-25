@@ -4,8 +4,6 @@ import { useEffect } from "react";
 
 type FormErrorsEvent = CustomEvent<{ errors: Record<string, string> }>;
 
-const ignoredTypes = new Set(["hidden", "checkbox", "radio", "file", "submit", "button", "reset", "color", "date", "datetime-local", "time", "month", "week"]);
-
 function fieldLabel(control: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement) {
   const label = control.closest("label");
   if (!label) return "este campo";
@@ -52,56 +50,8 @@ function clearError(control: HTMLInputElement | HTMLTextAreaElement | HTMLSelect
   control.parentElement?.querySelector(":scope > .form-field-error")?.remove();
 }
 
-function enhance(root: ParentNode = document) {
-  root.querySelectorAll<HTMLFormElement>("form").forEach(form => {
-    form.dataset.formEnhanced = "true";
-    const controls = form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>("input, textarea, select");
-    controls.forEach(control => {
-      const type = control instanceof HTMLInputElement ? control.type : "";
-      const label = control.closest("label");
-      if (control.required && label && !label.querySelector(".form-required-mark")) {
-        label.classList.add("form-label-required");
-        let caption = label.querySelector<HTMLElement>(":scope > .form-label-text");
-        if (!caption) {
-          caption = document.createElement("span");
-          caption.className = "form-label-text";
-          const leadingNodes: ChildNode[] = [];
-          for (const node of Array.from(label.childNodes)) {
-            if (node === control || (node instanceof HTMLElement && node.contains(control))) break;
-            leadingNodes.push(node);
-          }
-          leadingNodes.forEach(node => caption?.append(node));
-          label.insertBefore(caption, control);
-        }
-        const mark = document.createElement("span");
-        mark.className = "form-required-mark";
-        mark.textContent = "*";
-        mark.title = document.documentElement.lang === "en" ? "Required field" : "Campo obligatorio";
-        mark.setAttribute("aria-hidden", "true");
-        caption.append(mark);
-      }
-      if (!(control instanceof HTMLSelectElement) && !ignoredTypes.has(type) && !control.placeholder) {
-        const name = fieldLabel(control);
-        control.placeholder = document.documentElement.lang === "en" ? `Enter ${name.toLowerCase()}` : `Escribe ${name.toLowerCase()}`;
-      }
-    });
-    form.querySelector(":scope > .form-required-note")?.remove();
-  });
-}
-
 export function FormExperience() {
   useEffect(() => {
-    let observer: MutationObserver | undefined;
-    let frame = 0;
-    const start = () => {
-      frame = window.requestAnimationFrame(() => {
-        enhance();
-        observer = new MutationObserver(() => enhance());
-        observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["required"] });
-      });
-    };
-    if (document.readyState === "complete") start();
-    else window.addEventListener("load", start, { once: true });
     const invalid = (event: Event) => {
       const control = event.target;
       if (control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement || control instanceof HTMLSelectElement) showError(control, validationMessage(control, document.documentElement.lang));
@@ -124,7 +74,7 @@ export function FormExperience() {
     document.addEventListener("input", input, true);
     document.addEventListener("change", input, true);
     document.addEventListener("form:errors", customErrors);
-    return () => { window.removeEventListener("load", start); window.cancelAnimationFrame(frame); observer?.disconnect(); document.removeEventListener("invalid", invalid, true); document.removeEventListener("input", input, true); document.removeEventListener("change", input, true); document.removeEventListener("form:errors", customErrors); };
+    return () => { document.removeEventListener("invalid", invalid, true); document.removeEventListener("input", input, true); document.removeEventListener("change", input, true); document.removeEventListener("form:errors", customErrors); };
   }, []);
   return null;
 }

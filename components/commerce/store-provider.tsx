@@ -13,7 +13,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      try { setFavorites(JSON.parse(localStorage.getItem("oros-favorites") ?? "[]")); setCart(JSON.parse(localStorage.getItem("oros-cart") ?? "[]")); } catch { /* datos locales inválidos */ }
+      try {
+        setFavorites(JSON.parse(localStorage.getItem("oros-favorites") ?? "[]"));
+        const stored = JSON.parse(localStorage.getItem("oros-cart") ?? "[]") as Array<StoreItem | (Omit<Extract<StoreItem, { kind: "product" }>, "kind">)>;
+        setCart(stored.map(item => "kind" in item ? item : { ...item, kind: "product" }));
+      } catch { /* datos locales inválidos */ }
       setReady(true);
     }, 0);
     return () => window.clearTimeout(timer);

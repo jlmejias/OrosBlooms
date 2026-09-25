@@ -1,4 +1,8 @@
-export type StoreItem = { productId: string; variantId?: string; slug: string; name: string; price: number; image?: string | null; quantity: number; personalization?: string };
+type StoreItemBase = { slug: string; name: string; price: number; image?: string | null; quantity: number; personalization?: string };
+export type StoreItem = StoreItemBase & (
+  | { kind: "product"; productId: string; variantId?: string }
+  | { kind: "combo"; comboId: string }
+);
 
 export function toggleFavorite(items: string[], slug: string) {
   return items.includes(slug) ? items.filter(item => item !== slug) : [...items, slug];
@@ -15,4 +19,10 @@ export function updateCartQuantity(items: StoreItem[], index: number, quantity: 
 
 export function cartTotal(items: StoreItem[]) {
   return items.reduce((total, item) => total + item.price * item.quantity, 0);
+}
+
+export function checkoutLines(items: StoreItem[]) {
+  return items.map(item => item.kind === "combo"
+    ? { kind: item.kind, comboId: item.comboId, quantity: item.quantity, personalization: item.personalization }
+    : { kind: item.kind, productId: item.productId, variantId: item.variantId, quantity: item.quantity, personalization: item.personalization });
 }

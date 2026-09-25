@@ -5,9 +5,11 @@ import { useEffect, useState } from "react";
 
 export function NavigationFeedback() {
   const pathname = usePathname();
-  const [loading, setLoading] = useState(false);
+  return <NavigationFeedbackForPath key={pathname} />;
+}
 
-  useEffect(() => { setLoading(false); }, [pathname]);
+function NavigationFeedbackForPath() {
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const onClick = (event: MouseEvent) => {

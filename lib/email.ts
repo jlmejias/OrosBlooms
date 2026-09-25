@@ -36,6 +36,7 @@ function row(label: string, value: unknown) {
 }
 
 export async function sendInquiryEmails(inquiry: InquiryEmail) {
+  if (process.env.EMAIL_TRANSPORT === "mock") return { sent: true as const, mocked: true as const };
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM_EMAIL;
   const internalRecipient = process.env.RESEND_NOTIFICATION_EMAIL ?? process.env.ADMIN_EMAIL;

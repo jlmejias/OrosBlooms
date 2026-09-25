@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { randomUUID } from "node:crypto";
 import { PublicShell } from "@/components/commerce/public-shell";
 import { stringValue } from "@/lib/format";
 import { getLocale } from "@/lib/i18n";
@@ -18,9 +19,10 @@ export default async function RequestPage({ searchParams }: { searchParams: Prom
       <p className="commerce-kicker">{es ? "Solicitud personalizada" : "Custom request"}</p>
       <h1>{es ? "Cuéntanos qué quieres celebrar." : "Tell us what you are celebrating."}</h1>
       <p>{es ? "Completa la información disponible. Te contactaremos para afinar el diseño y preparar una cotización." : "Share the details you have. We will contact you to refine the design and prepare a quote."}</p>
-      {params.error && <p role="alert">{es ? "Revisa los campos señalados e inténtalo nuevamente." : "Review the highlighted fields and try again."}</p>}
+      {params.error && <p role="alert">{params.error === "rate" ? (es ? "Has enviado varias solicitudes. Espera unos minutos e inténtalo nuevamente." : "You have sent several requests. Wait a few minutes and try again.") : params.error === "archivos" ? (es ? "Usa un máximo de 3 imágenes JPG, PNG o WebP de hasta 5 MB cada una." : "Use up to 3 JPG, PNG, or WebP images of no more than 5 MB each.") : (es ? "Revisa los campos señalados e inténtalo nuevamente." : "Review the highlighted fields and try again.")}</p>}
     </header>
     <form action={createInquiry} className="commerce-form">
+      <input type="hidden" name="idempotencyKey" value={randomUUID()}/>
       <label>{es ? "Nombre" : "Name"}<input name="name" required minLength={2} placeholder={es ? "Tu nombre completo" : "Your full name"}/></label>
       <label>{es ? "Teléfono / WhatsApp" : "Phone / WhatsApp"}<input name="phone" type="tel" required minLength={7} placeholder={es ? "+506 8888 8888" : "+1 555 123 4567"}/></label>
       <label>{es ? "Correo" : "Email"}<input name="email" type="email" placeholder={es ? "nombre@correo.com" : "name@email.com"}/></label>

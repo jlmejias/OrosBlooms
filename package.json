@@ -2,6 +2,7 @@
   "name": "orosblooms",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,11 +10,16 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "node --test tests/*.test.ts",
+    "admin:hash-password": "node scripts/hash-admin-password.mjs",
+    "storage:report": "node scripts/storage-report.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node scripts/migrate-db.cjs",
-    "db:check": "tsx scripts/check-db.ts",
-    "db:seed": "tsx scripts/seed-db.ts",
-    "db:check-business": "tsx scripts/check-business-db.ts"
+    "db:check": "node --experimental-strip-types scripts/check-db.ts",
+    "db:seed": "node --experimental-strip-types scripts/seed-db.ts",
+    "db:clear": "node scripts/clear-db.cjs",
+    "db:check-business": "node --experimental-strip-types scripts/check-business-db.ts",
+    "qa:setup": "node scripts/qa-setup.mjs",
+    "test:e2e": "npm run build && playwright test"
   },
   "dependencies": {
     "@ant-design/icons": "^6.3.4",
@@ -31,6 +37,7 @@
     "zod": "^4.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4.1.0",
     "@types/node": "^22.0.0",
     "@types/pg": "^8.15.0",

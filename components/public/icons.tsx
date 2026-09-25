@@ -1,4 +1,4 @@
-type IconName = "menu" | "close" | "search" | "bag" | "heart" | "user" | "home" | "flower" | "sparkle" | "arrow" | "instagram";
+type IconName = "menu" | "close" | "search" | "bag" | "heart" | "user" | "home" | "flower" | "sparkle" | "arrow" | "instagram" | "facebook";
 
 export function Icon({ name, size = 20, className }: { name: IconName; size?: number; className?: string }) {
   const common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.7, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, className, "aria-hidden": true as const };
@@ -14,6 +14,7 @@ export function Icon({ name, size = 20, className }: { name: IconName; size?: nu
     sparkle: <><path d="m12 2 2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2L12 2Z" /></>,
     arrow: <><path d="M4 12h16m-6-6 6 6-6 6" /></>,
     instagram: <><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r=".5" fill="currentColor" /></>,
+    facebook: <><path d="M14 21v-8h3l.5-3H14V8.5c0-.9.3-1.5 1.7-1.5H18V4.3c-.6-.1-1.5-.3-2.6-.3C12.7 4 11 5.6 11 8.6V10H8v3h3v8" /></>,
   };
   return <svg {...common}>{paths[name]}</svg>;
 }
