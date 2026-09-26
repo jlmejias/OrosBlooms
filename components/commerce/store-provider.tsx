@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { removeCartItem, toggleFavorite, updateCartQuantity, type StoreItem } from "@/lib/store";
+import { addCartItem, removeCartItem, toggleFavorite, updateCartQuantity, type StoreItem } from "@/lib/store";
 
 export type { StoreItem } from "@/lib/store";
 type StoreContextValue = { favorites: string[]; cart: StoreItem[]; toggleFavorite: (slug: string) => void; addItem: (item: StoreItem) => void; removeItem: (index: number) => void; updateQuantity: (index: number, quantity: number) => void; clearCart: () => void };
@@ -24,7 +24,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
   useEffect(() => { if (ready) localStorage.setItem("oros-favorites", JSON.stringify(favorites)); }, [favorites, ready]);
   useEffect(() => { if (ready) localStorage.setItem("oros-cart", JSON.stringify(cart)); }, [cart, ready]);
-  const value = useMemo<StoreContextValue>(() => ({ favorites, cart, toggleFavorite: slug => setFavorites(current => toggleFavorite(current, slug)), addItem: item => setCart(current => [...current, item]), removeItem: index => setCart(current => removeCartItem(current, index)), updateQuantity: (index, quantity) => setCart(current => updateCartQuantity(current, index, quantity)), clearCart: () => setCart([]) }), [favorites, cart]);
+  const value = useMemo<StoreContextValue>(() => ({ favorites, cart, toggleFavorite: slug => setFavorites(current => toggleFavorite(current, slug)), addItem: item => setCart(current => addCartItem(current, item)), removeItem: index => setCart(current => removeCartItem(current, index)), updateQuantity: (index, quantity) => setCart(current => updateCartQuantity(current, index, quantity)), clearCart: () => setCart([]) }), [favorites, cart]);
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
 

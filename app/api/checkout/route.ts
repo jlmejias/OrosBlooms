@@ -7,6 +7,7 @@ import { comboItems, combos, customers, orderInventoryItems, orderItems, orders,
 import { customerIdentityKey, normalizeEmail, normalizePhone } from "@/lib/customer-identity";
 import { clientIp, consumeRateLimit } from "@/lib/rate-limit";
 import { calculateOrderPricing } from "@/lib/order-pricing";
+import { sendOrderCreatedEmails } from "@/lib/email";
 
 const productLineSchema = z.object({ kind: z.literal("product"), productId: z.string().uuid(), variantId: z.string().uuid().optional(), quantity: z.number().int().min(1).max(20), personalization: z.string().trim().max(500).optional() });
 const comboLineSchema = z.object({ kind: z.literal("combo"), comboId: z.string().uuid(), quantity: z.number().int().min(1).max(20), personalization: z.string().trim().max(500).optional() });
@@ -105,6 +106,7 @@ export async function POST(request: Request) {
       if (inventory.size) await tx.insert(orderInventoryItems).values([...inventory].map(([variantId, quantity]) => ({ orderId: order.id, variantId, quantity })));
       return order;
     });
+    await sendOrderCreatedEmails({ reference: result.reference, name: value.name, email: value.email || undefined, phone: value.phone, fulfillment: value.fulfillment, amount: result.deposit, sinpeNumber: process.env.SINPE_MOBILE_NUMBER }).catch(error => console.error("order_email_failed", { reference: result.reference, error }));
     return NextResponse.json(responseFor(result));
   } catch (error) {
     if (error instanceof CheckoutError) return NextResponse.json({ error: error.message }, { status: error.status });

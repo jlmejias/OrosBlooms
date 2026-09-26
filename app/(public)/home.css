@@ -308,3 +308,4 @@
   .home-hero-photo, .home-hero-copy > *:not(.home-hero-aside) { animation: none; }
   .home-pill, .home-category-image img, .home-product-image img, .home-gallery-item img { transition: none; }
 }
+.home-cart-button{position:relative!important;overflow:visible!important}.home-cart-button .cart-count-badge{position:absolute!important;z-index:4;top:0;right:0;display:grid!important;place-items:center;min-width:18px;height:18px;padding:0 4px;border:2px solid #fff;border-radius:999px;background:#b45f59!important;color:#fff!important;font-size:10px!important;font-weight:800;line-height:1;pointer-events:none}

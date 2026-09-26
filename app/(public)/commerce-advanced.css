@@ -23,4 +23,12 @@
 .combo-card p,.combo-card ul { margin-top: 1rem; color: var(--muted); line-height: 1.7; }
 .combo-price { display: flex; align-items: center; gap: .8rem; }
 .combo-price strong { color: var(--foreground); font-size: 1.2rem; }
+.complement-options .complement-option { grid-template-columns: auto 64px minmax(0, 1fr) auto; gap: .85rem; padding: .6rem; border: 1px solid transparent; border-radius: 12px; cursor: pointer; }
+.complement-options .complement-option:has(input:checked) { border-color: var(--burgundy); background: #fbf7f5; }
+.complement-option-image { position: relative; display: grid; place-items: center; width: 64px; height: 64px; overflow: hidden; border-radius: 10px; background: #f2eee8; color: var(--muted); font-size: 1.25rem; }
+.complement-option-image img { object-fit: cover; }
+.complement-option-copy { display: grid; gap: .2rem; min-width: 0; }
+.complement-option-copy strong { color: var(--foreground); font-size: .95rem; }
+.complement-option-copy small { color: var(--muted); font-size: .76rem; font-weight: 400; }
+.complement-option-price { white-space: nowrap; color: var(--foreground); }
 @media(max-width:700px){.gift-progress{grid-template-columns:1fr 1fr}.gift-review div{grid-template-columns:1fr;gap:.25rem}.combo-card{grid-template-columns:1fr}}

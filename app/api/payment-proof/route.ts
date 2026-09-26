@@ -2,10 +2,11 @@ import { randomUUID } from "node:crypto";
 import { and, eq, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/db/client";
-import { mediaAssets, orders } from "@/db/schema";
+import { customers, mediaAssets, orders } from "@/db/schema";
 import { deletePrivateBlob, uploadPrivateBlob } from "@/lib/blob";
 import { hasValidImageSignature } from "@/lib/upload-validation";
 import { clientIp, consumeRateLimit } from "@/lib/rate-limit";
+import { sendPaymentProofEmails } from "@/lib/email";
 
 export async function POST(request: Request) {
   let uploadedPath: string | undefined;
@@ -20,7 +21,7 @@ export async function POST(request: Request) {
     const bytes = new Uint8Array(await file.arrayBuffer());
     if (!hasValidImageSignature(bytes, file.type)) return NextResponse.json({ error: "El contenido del archivo no coincide con una imagen permitida." }, { status: 400 });
 
-    const [order] = await db.select({ id: orders.id, status: orders.status, paymentStatus: orders.paymentStatus, proofAssetId: orders.paymentProofAssetId, oldProviderId: mediaAssets.providerId }).from(orders).leftJoin(mediaAssets, eq(mediaAssets.id, orders.paymentProofAssetId)).where(and(eq(orders.reference, reference), eq(orders.trackingToken, token), eq(orders.paymentMethod, "sinpe"))).limit(1);
+    const [order] = await db.select({ id: orders.id, status: orders.status, paymentStatus: orders.paymentStatus, proofAssetId: orders.paymentProofAssetId, oldProviderId: mediaAssets.providerId, customerName: customers.name, customerEmail: customers.email }).from(orders).leftJoin(mediaAssets, eq(mediaAssets.id, orders.paymentProofAssetId)).leftJoin(customers, eq(customers.id, orders.customerId)).where(and(eq(orders.reference, reference), eq(orders.trackingToken, token), eq(orders.paymentMethod, "sinpe"))).limit(1);
     if (!order) return NextResponse.json({ error: "Pedido no encontrado." }, { status: 404 });
     if (order.status === "cancelled" || !["unpaid", "failed"].includes(order.paymentStatus)) return NextResponse.json({ error: order.paymentStatus === "pending_review" ? "El comprobante ya está pendiente de revisión." : "Este pedido ya no admite comprobantes." }, { status: 409 });
 
@@ -37,6 +38,7 @@ export async function POST(request: Request) {
       await db.delete(mediaAssets).where(eq(mediaAssets.id, order.proofAssetId));
       await deletePrivateBlob(order.oldProviderId).catch(error => console.error("old_payment_proof_cleanup_failed", error));
     }
+    await sendPaymentProofEmails({ reference, name: order.customerName ?? "Cliente", email: order.customerEmail ?? undefined }).catch(error => console.error("payment_proof_email_failed", { reference, error }));
     return NextResponse.json({ ok: true });
   } catch (error) {
     if (uploadedPath) await deletePrivateBlob(uploadedPath).catch(cleanupError => console.error("payment_proof_cleanup_failed", cleanupError));

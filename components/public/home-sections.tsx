@@ -20,6 +20,7 @@ function copyFor(key: HomepageSectionKey, content: EditableContent, locale: Loca
   return { title: String(title), subtitle: String(subtitle) };
 }
 function imagesFor(content:EditableContent,fallback:readonly string[]){const images=content?.images;return Array.isArray(images)?fallback.map((image,index)=>typeof images[index]==="string"&&images[index]?String(images[index]):image):[...fallback]}
+function labelsFor(content:EditableContent,fallback:readonly string[]){const labels=content?.imageLabels;return Array.isArray(labels)?fallback.map((label,index)=>typeof labels[index]==="string"&&labels[index]?String(labels[index]):label):[...fallback]}
 function socialHref(value:string,network:"instagram"|"facebook"){const trimmed=value.trim();if(!trimmed)return "";if(/^https?:\/\//i.test(trimmed))return trimmed;const handle=trimmed.replace(/^@/,"").replace(/^\/+|\/+$/g,"");return `https://${network}.com/${handle}`}
 
 function SectionIntro({ eyebrow, title, description, action }: { eyebrow: string; title: string; description?: string; action?: { label: string; target: string } }) {
@@ -30,8 +31,9 @@ export function HomeCategories({locale,content}:{locale:Locale;content?:Editable
   const es=locale==="es";
   const copy=copyFor("categories",content,locale);
   const images=imagesFor(content,categories.map(item=>item.image));
+  const labels=labelsFor(content,categories.map(item=>item.title));
   return <section id="categorias" className="home-categories home-section"><Container><SectionIntro eyebrow={es?"Encuentra tu momento":"Find your moment"} title={copy.title} description={copy.subtitle} />
-    <div className="home-category-rail">{categories.map((category,index) => <a className="home-category" href={category.target} key={category.title}><span className="home-category-image"><Image src={images[index]} alt={category.alt} fill sizes="(max-width: 768px) 108px, (max-width: 1280px) 14vw, 180px" className="home-cover" /></span><span className="home-category-title">{category.title}</span><span className="home-category-more">{es?"Ver inspiración":"Explore inspiration"} <Icon name="arrow" size={14} /></span></a>)}</div>
+    <div className="home-category-rail">{categories.map((category,index) => <a className="home-category" href={category.target} key={category.title}><span className="home-category-image"><Image src={images[index]} alt={labels[index]} fill sizes="(max-width: 768px) 108px, (max-width: 1280px) 14vw, 180px" className="home-cover" /></span><span className="home-category-title">{labels[index]}</span><span className="home-category-more">{es?"Ver inspiración":"Explore inspiration"} <Icon name="arrow" size={14} /></span></a>)}</div>
   </Container></section>;
 }
 

@@ -4,6 +4,8 @@ import { Button, Input, InputNumber, Modal, Switch } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { createCategoryQuick } from "@/app/admin/actions";
+import { AdminFormGrid, AdminFormSection } from "./admin-form-section";
+import { DraggableModal } from "./draggable-modal";
 
 type CategoryOption = { id: string; name: string };
 
@@ -45,14 +47,11 @@ export function CategoryQuickSelect({ categories, initialCategoryId = "" }: { ca
       <label>Categoría<select name="categoryId" value={selectedId} onChange={event => setSelectedId(event.target.value)}><option value="">Sin categoría</option>{options.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
       <Button htmlType="button" icon={<PlusOutlined/>} onClick={() => setOpen(true)}>Nueva categoría</Button>
     </div>
-    <Modal title="Nueva categoría" open={open} onCancel={close} destroyOnHidden footer={<><Button htmlType="button" onClick={close} disabled={saving}>Cancelar</Button><Button htmlType="button" type="primary" loading={saving} onClick={create}>Crear y seleccionar</Button></>}>
-      <div className="admin-quick-category-form">
+    <Modal className="admin-standard-modal" title={<div className="admin-modal-title"><strong>Nueva categoría</strong><span>Créala sin salir del formulario de producto.</span></div>} open={open} onCancel={close} destroyOnHidden width={720} centered modalRender={modal => <DraggableModal>{modal}</DraggableModal>} footer={<><Button htmlType="button" onClick={close} disabled={saving}>Cancelar</Button><Button htmlType="button" type="primary" loading={saving} onClick={create}>Crear y seleccionar</Button></>}>
+      <div className="admin-quick-category-form admin-pattern-form">
         {error && <p role="alert" className="admin-quick-category-error">{error}</p>}
-        <label htmlFor="quick-category-name">Nombre de categoría</label><Input id="quick-category-name" value={name} autoFocus maxLength={100} onChange={event => { const next=event.target.value;setName(next);if(!slugEdited)setSlug(categorySlug(next)); }}/>
-        <label htmlFor="quick-category-slug">Identificador URL</label><Input id="quick-category-slug" value={slug} maxLength={100} onChange={event => { setSlugEdited(true);setSlug(categorySlug(event.target.value)); }}/>
-        <label htmlFor="quick-category-description">Descripción</label><Input.TextArea id="quick-category-description" value={description} maxLength={500} rows={3} onChange={event => setDescription(event.target.value)}/>
-        <label htmlFor="quick-category-order">Orden</label><InputNumber id="quick-category-order" value={sortOrder} min={0} precision={0} onChange={value => setSortOrder(value ?? 0)} />
-        <label className="admin-quick-category-switch"><Switch checked={visible} onChange={setVisible}/> Visible en el catálogo</label>
+        <AdminFormSection number="1" title="Información básica" text="Define cómo aparecerá la categoría en el catálogo."><AdminFormGrid><label htmlFor="quick-category-name"><span>Nombre de categoría <em>*</em></span><Input id="quick-category-name" value={name} autoFocus maxLength={100} onChange={event => { const next=event.target.value;setName(next);if(!slugEdited)setSlug(categorySlug(next)); }}/></label><label htmlFor="quick-category-slug"><span>Identificador URL <em>*</em></span><Input id="quick-category-slug" value={slug} maxLength={100} onChange={event => { setSlugEdited(true);setSlug(categorySlug(event.target.value)); }}/></label></AdminFormGrid><label htmlFor="quick-category-description"><span>Descripción</span><Input.TextArea id="quick-category-description" value={description} maxLength={500} rows={3} onChange={event => setDescription(event.target.value)}/></label></AdminFormSection>
+        <AdminFormSection number="2" title="Orden y visibilidad" text="Controla la posición y disponibilidad de la categoría."><AdminFormGrid><label htmlFor="quick-category-order"><span>Orden</span><InputNumber id="quick-category-order" value={sortOrder} min={0} precision={0} onChange={value => setSortOrder(value ?? 0)} /></label><label className="admin-quick-category-switch"><Switch checked={visible} onChange={setVisible}/> <span>Visible en el catálogo</span></label></AdminFormGrid></AdminFormSection>
       </div>
     </Modal>
   </>;

@@ -14,4 +14,11 @@ export async function createAdminSession(email: string) { const token=createAdmi
 export async function getAdminSession() { const token=(await cookies()).get(COOKIE)?.value;if(!token)return null;return verifyAdminSessionToken(token,secret()); }
 export async function requireAdmin() { const session = await getAdminSession(); if (!session) redirect("/acceso-admin"); return session; }
 export async function clearAdminSession() { (await cookies()).delete(COOKIE); }
-export async function validAdminCredentials(email: string, password: string) { const expectedEmail = process.env.ADMIN_EMAIL ?? (explicitLocalFallback() ? "admin@orosblooms.local" : ""); const passwordHash = process.env.ADMIN_PASSWORD_HASH; if (!expectedEmail || !safeEqual(email.toLowerCase(), expectedEmail.toLowerCase())) return false; if (passwordHash) return verifyPassword(password, passwordHash); return explicitLocalFallback() && safeEqual(password, "OrosBlooms2026!"); }
+export async function validAdminCredentials(email: string, password: string) {
+  if (process.env.NODE_ENV === "development") return safeEqual(email, "oros") && safeEqual(password, "oros");
+  const expectedEmail = process.env.ADMIN_EMAIL ?? "";
+  const passwordHash = process.env.ADMIN_PASSWORD_HASH;
+  if (!expectedEmail || !safeEqual(email.toLowerCase(), expectedEmail.toLowerCase())) return false;
+  if (!passwordHash) return false;
+  return verifyPassword(password, passwordHash);
+}
