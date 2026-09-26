@@ -1,4 +1,5 @@
-export const siteUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000");
+const defaultSiteUrl = process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://www.orosblooms.com";
+export const siteUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? defaultSiteUrl);
 
 export function absoluteUrl(path = "/") {
   return new URL(path, siteUrl).toString();
