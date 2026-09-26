@@ -9,8 +9,14 @@ export async function loginAdmin(formData: FormData) {
   const username = String(formData.get("username") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   if (process.env.NODE_ENV !== "development") {
-    const sessionSecret = process.env.ADMIN_SESSION_SECRET;
-    if (!process.env.ADMIN_PASSWORD_HASH || !sessionSecret || sessionSecret.length < 32) {
+    const passwordHash = process.env.ADMIN_PASSWORD_HASH?.trim();
+    const sessionSecret = process.env.ADMIN_SESSION_SECRET?.trim();
+    if (!passwordHash || !sessionSecret || sessionSecret.length < 32) {
+      console.error("[admin] invalid production configuration", {
+        hasPasswordHash: Boolean(passwordHash),
+        passwordHashFormat: passwordHash?.startsWith("scrypt$") ?? false,
+        sessionSecretLength: sessionSecret?.length ?? 0,
+      });
       redirect("/acceso-admin?error=config");
     }
     const requestHeaders = await headers();
