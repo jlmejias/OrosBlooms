@@ -21,7 +21,7 @@ Abre `http://localhost:3000`. PostgreSQL se publica solamente en `127.0.0.1:5432
 
 ## Administración segura
 
-Genera el hash de la contraseña con `npm run admin:hash-password -- "una contraseña larga"` y configura `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH` y un `ADMIN_SESSION_SECRET` de al menos 32 caracteres. El acceso local inseguro solo se habilita explícitamente con `ALLOW_INSECURE_LOCAL_ADMIN=true` y nunca funciona en producción.
+Genera el hash de la contraseña con `npm run admin:hash-password -- "una contraseña de al menos 8 caracteres"` y configura `ADMIN_PASSWORD_HASH` y un `ADMIN_SESSION_SECRET` de al menos 32 caracteres. El acceso local inseguro solo se habilita explícitamente con `ALLOW_INSECURE_LOCAL_ADMIN=true` y nunca funciona en producción.
 
 Los archivos públicos y privados usan Neon Object Storage en producción. El fallback local está limitado a desarrollo o a QA explícito.
 
