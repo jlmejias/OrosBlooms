@@ -22,8 +22,22 @@ export async function loginAdmin(formData: FormData) {
     const rate = await consumeRateLimit("admin-login", `${clientIp(requestHeaders)}:${username.toLowerCase()}`, { limit: 5, windowSeconds: 900 });
     if (!rate.allowed) redirect("/acceso-admin?error=rate");
   }
-  if (!await validAdminCredentials(username, password)) redirect("/acceso-admin?error=1");
-  if (process.env.NODE_ENV !== "development") await provisionInitialAdmin();
+  let credentialsValid = false;
+  try {
+    credentialsValid = await validAdminCredentials(username, password);
+  } catch (error) {
+    console.error("[admin] login database error", error);
+    redirect("/acceso-admin?error=config");
+  }
+  if (!credentialsValid) redirect("/acceso-admin?error=1");
+  if (process.env.NODE_ENV !== "development") {
+    try {
+      await provisionInitialAdmin();
+    } catch (error) {
+      console.error("[admin] account provisioning error", error);
+      redirect("/acceso-admin?error=config");
+    }
+  }
   await createAdminSession(username);
   redirect("/admin");
 }
