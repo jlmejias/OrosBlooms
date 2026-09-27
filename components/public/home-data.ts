@@ -8,10 +8,10 @@ export const categories = [
 ] as const;
 
 export const featuredProducts = [
-  { name: "Ramo Aurora", description: "Rosas suaves y flores de temporada", price: "Desde ₡28.000", image: "/bouquet-editorial.png", alt: "Ramo en tonos rosados y crema" },
-  { name: "Rosas de Amor", description: "Un gesto clásico que siempre emociona", price: "Desde ₡30.000", image: "/home-roses.webp", alt: "Ramo de rosas rojas" },
-  { name: "Luz de Primavera", description: "Color y calidez para celebrar", price: "Desde ₡26.000", image: "/home-sunflowers.webp", alt: "Ramo de girasoles amarillos" },
-  { name: "Jardín Rosado", description: "Una composición delicada y natural", price: "Desde ₡32.000", image: "/home-hero.webp", alt: "Ramo de rosas y peonías rosadas" },
+  { name: "Ramo Aurora", description: "Rosas suaves y flores de temporada", price: "Desde $55", image: "/bouquet-editorial.png", alt: "Ramo en tonos rosados y crema" },
+  { name: "Rosas de Amor", description: "Un gesto clásico que siempre emociona", price: "Desde $60", image: "/home-roses.webp", alt: "Ramo de rosas rojas" },
+  { name: "Luz de Primavera", description: "Color y calidez para celebrar", price: "Desde $52", image: "/home-sunflowers.webp", alt: "Ramo de girasoles amarillos" },
+  { name: "Jardín Rosado", description: "Una composición delicada y natural", price: "Desde $65", image: "/home-hero.webp", alt: "Ramo de rosas y peonías rosadas" },
 ] as const;
 
 export const editorialFeaturedProducts = [

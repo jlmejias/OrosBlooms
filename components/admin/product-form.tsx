@@ -7,10 +7,11 @@ import { useEffect, useRef, useState } from "react";
 import { saveProduct } from "@/app/admin/actions";
 import { AdminFormGrid, AdminFormSection } from "./admin-form-section";
 import { CategoryQuickSelect } from "./category-quick-select";
+import { ProductDescriptionEditor } from "./product-description-editor";
 import { ValidatedAdminForm } from "./validated-admin-form";
 
 type Category = { id: string; name: string };
-type Product = { id: string; name: string; type: "floral" | "complement" | "personalized"; categoryId: string | null; basePrice: number; status: "draft" | "active" | "archived"; featured: boolean; shortDescription: string | null };
+type Product = { id: string; name: string; type: "floral" | "complement" | "personalized"; categoryId: string | null; basePrice: number; status: "draft" | "active" | "archived"; featured: boolean; shortDescription: string | null; description: string | null };
 
 function slugify(value: string) {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
@@ -55,13 +56,13 @@ export function ProductForm({ editing, categories, initialImageUrl = "" }: { edi
         </AdminFormSection>
         <AdminFormSection number="2" title="Precio y estado" text="Define el precio y disponibilidad del producto.">
           <AdminFormGrid>
-            <label><span>Precio <em>*</em></span><input name="basePrice" type="number" defaultValue={editing?.basePrice} placeholder="0" min={0} step={1} required/></label>
+            <label><span>Precio (USD) <em>*</em></span><input name="basePrice" type="number" defaultValue={editing?.basePrice} placeholder="0" min={0} step={1} required/></label>
             <label>Estado<select name="status" defaultValue={editing?.status ?? "draft"}><option value="draft">● Borrador</option><option value="active">● Activo</option><option value="archived">● Archivado</option></select></label>
             <label className="admin-checkbox-field"><input name="featured" type="checkbox" defaultChecked={editing?.featured}/><span>Destacar en la portada</span></label>
           </AdminFormGrid>
         </AdminFormSection>
         <AdminFormSection number="3" title="Descripción" text="Describe el producto, materiales, medidas o detalles.">
-          <label>Descripción<textarea name="description" defaultValue={editing?.shortDescription ?? ""} placeholder="Escribe una descripción detallada del producto..." maxLength={2000}/></label>
+          <label><span>Descripción</span><ProductDescriptionEditor name="description" value={editing?.description ?? editing?.shortDescription ?? ""}/><small>Usa negrita, cursiva, tachado, listas o enlaces para resaltar detalles.</small></label>
         </AdminFormSection>
       </div>
       <aside className="product-form-media">

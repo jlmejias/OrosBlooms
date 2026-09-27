@@ -9,7 +9,7 @@ Estado: arquitectura de foundation implementada en Fase 0; módulos de negocio p
 - PostgreSQL como fuente de verdad; Drizzle ORM para esquema, consultas y migraciones. Las lecturas públicas se centralizan en servicios de servidor. Las escrituras validan entrada con Zod y autorización en el servidor.
 - shadcn/ui se incorpora por componentes concretos, especialmente en el administrador; no se instala una biblioteca visual entera sin uso. Tailwind y tokens CSS expresan la marca.
 - Imágenes en Cloudinary o proveedor equivalente detrás de un adaptador. PostgreSQL almacena referencias y metadatos, no binarios.
-- Moneda inicial CRC; precios en enteros de colones, nunca números de punto flotante. Moneda y reglas de entrega serán configurables.
+- Moneda USD; precios en dólares enteros, nunca números de punto flotante. Las reglas de entrega son configurables.
 - Un solo catálogo de productos distinguido por `product.type`: `floral`, `complement` y `personalized`. Flores son la entrada principal; complementos y personalizados pueden venderse por separado cuando el negocio lo requiera, sin crear administraciones paralelas.
 - La relación entre arreglo floral y complementos recomendados será explícita y ordenable. No se infiere de la categoría: un ramo de novia puede recomendar opciones distintas a un ramo de cumpleaños.
 - El cálculo de regalos y combos quedará en un servicio de dominio: variante floral + complementos seleccionados + cantidades + ajustes aplicables. La UI no será la fuente de verdad del total; pedidos guardarán instantáneas de cada línea.

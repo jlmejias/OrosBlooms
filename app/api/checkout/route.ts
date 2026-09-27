@@ -89,7 +89,7 @@ export async function POST(request: Request) {
       const subtotal = lines.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0);
       const [businessRow] = await tx.select({ value: siteSettings.value }).from(siteSettings).where(eq(siteSettings.key, "business")).limit(1);
       const business = (businessRow?.value ?? {}) as Record<string, unknown>;
-      const configuredDeliveryFee = Number(business.deliveryFee ?? process.env.DELIVERY_FEE_CRC ?? 0);
+      const configuredDeliveryFee = Number(business.deliveryFee ?? process.env.DELIVERY_FEE_USD ?? 0);
       const deliveryFee = value.fulfillment === "delivery" && Number.isFinite(configuredDeliveryFee) ? Math.max(0, Math.round(configuredDeliveryFee)) : 0;
       const depositPercent = Math.min(100, Math.max(0, Number(business.depositPercent ?? 100)));
       const pricing = calculateOrderPricing(subtotal, deliveryFee, depositPercent);

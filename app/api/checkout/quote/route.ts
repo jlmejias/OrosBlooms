@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     }
     const [businessRow] = await db.select({ value: siteSettings.value }).from(siteSettings).where(eq(siteSettings.key, "business")).limit(1);
     const business = (businessRow?.value ?? {}) as Record<string, unknown>;
-    const configuredDeliveryFee = Number(business.deliveryFee ?? process.env.DELIVERY_FEE_CRC ?? 0);
+    const configuredDeliveryFee = Number(business.deliveryFee ?? process.env.DELIVERY_FEE_USD ?? 0);
     const deliveryFee = parsed.data.fulfillment === "delivery" && Number.isFinite(configuredDeliveryFee) ? configuredDeliveryFee : 0;
     const depositPercent = Number(business.depositPercent ?? 100);
     return NextResponse.json(calculateOrderPricing(subtotal, deliveryFee, depositPercent));

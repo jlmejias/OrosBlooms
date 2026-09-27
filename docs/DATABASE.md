@@ -5,7 +5,7 @@ Estado: esquema de negocio y seed de desarrollo implementados en Fase 4. La Fase
 ## Convenciones
 
 - IDs UUID, claves foráneas explícitas, `created_at` y `updated_at` en entidades editables. Tiempos en UTC; fechas de evento con zona horaria de negocio definida.
-- Precios y montos en enteros de unidad monetaria mínima. CRC se muestra en colones; no usar `float`.
+- Precios y montos en dólares estadounidenses enteros; la interfaz los muestra como USD con dos decimales. No usar `float`.
 - Slugs únicos donde hay URL pública. Estados restringidos mediante enum o `CHECK`, más validación Zod.
 - Índices según consultas reales: slug, estado y fecha, claves foráneas y orden editorial. No almacenar imágenes binarias en PostgreSQL.
 - Borrado lógico en contenido con historial comercial cuando corresponda. Pedidos conservan instantáneas de nombre y precio de ítems para que cambios al catálogo no alteren compras pasadas.
@@ -56,4 +56,4 @@ Un arreglo recomienda complementos mediante la asociación explícita propuesta 
 
 Migraciones versionadas con Drizzle; aplicación explícita en desarrollo y despliegue, nunca `push` contra producción. `npm run db:seed` carga categorías, seis productos de muestra (cuatro florales activos y dos borradores), servicios, galería y un testimonio ficticio **sin aprobar**. Puede ejecutarse varias veces sin duplicar esos registros. `npm run db:check-business` verifica conteos, referencias básicas y que el testimonio ficticio no sea público. El seed es solo para desarrollo y no debe ejecutarse en producción. Bases de desarrollo, pruebas y E2E separadas por URL y credenciales. Los uploads privados no entran en el seed público.
 
-Los importes se guardan como enteros de colones costarricenses. El esquema comprueba importes no negativos, consistencia de totales de pedidos, rangos de presupuesto y unicidad de la imagen principal por producto. La aplicación deberá validar nuevamente entradas y transiciones de estado en sus fases respectivas. `updated_at` se actualiza explícitamente al editar; no existe trigger global. Las fechas se guardan con zona horaria y se mostrarán según la zona del negocio en la UI.
+Los importes se guardan como dólares estadounidenses enteros. El esquema comprueba importes no negativos, consistencia de totales de pedidos, rangos de presupuesto y unicidad de la imagen principal por producto. La aplicación deberá validar nuevamente entradas y transiciones de estado en sus fases respectivas. `updated_at` se actualiza explícitamente al editar; no existe trigger global. Las fechas se guardan con zona horaria y se mostrarán según la zona del negocio en la UI.

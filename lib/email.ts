@@ -24,7 +24,7 @@ const escapeHtml = (value: unknown) => String(value ?? "")
   .replaceAll('"', "&quot;")
   .replaceAll("'", "&#039;");
 
-const money = (value?: number) => value === undefined ? "—" : new Intl.NumberFormat("es-CR", { style: "currency", currency: "CRC", maximumFractionDigits: 0 }).format(value);
+const money = (value?: number) => value === undefined ? "—" : new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
 
 function layout(title: string, content: string) {
   return `<!doctype html><html lang="es"><body style="margin:0;background:#f5f2eb;font-family:Arial,sans-serif;color:#263228"><div style="display:none;max-height:0;overflow:hidden">${escapeHtml(title)}</div><div style="max-width:620px;margin:0 auto;padding:32px 18px"><div style="background:#fff;border:1px solid #e4ded2;border-radius:20px;overflow:hidden"><div style="padding:24px 28px;background:#263228;color:#fff"><div style="font-family:Georgia,serif;font-size:28px">OrosBlooms</div><div style="margin-top:4px;color:#dce3d8;font-size:12px;letter-spacing:.1em;text-transform:uppercase">Flores para cada historia</div></div><div style="padding:28px">${content}</div></div><p style="margin:18px 0 0;text-align:center;color:#7b7d76;font-size:12px">Este mensaje fue enviado automáticamente por OrosBlooms.</p></div></body></html>`;
