@@ -8,7 +8,7 @@
 
 ## Variables obligatorias
 
-Configurar `DATABASE_URL`, `NEXT_PUBLIC_SITE_URL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_SESSION_SECRET`. El secreto de sesión debe ser largo, aleatorio y distinto por ambiente. Completar también las variables `BUSINESS_*` descritas en `.env.example`; nunca publicar con los textos “pendiente de configuración”.
+Configurar `DATABASE_URL`, `NEXT_PUBLIC_SITE_URL`, `ADMIN_USERNAME`, `ADMIN_RECOVERY_EMAIL`, `ADMIN_PASSWORD_HASH` y `ADMIN_SESSION_SECRET`. El correo de recuperación debe poder recibir mensajes de Resend; el secreto de sesión debe ser largo, aleatorio y distinto por ambiente. Completar también las variables `BUSINESS_*` descritas en `.env.example`; nunca publicar con los textos “pendiente de configuración”.
 
 ## Proceso de publicación
 

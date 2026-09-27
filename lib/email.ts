@@ -101,3 +101,14 @@ export async function sendPaymentProofEmails(proof: { reference: string; name: s
   if (error) throw new Error(`Resend: ${error.message}`);
   return { sent: true as const };
 }
+
+export async function sendAdminPasswordResetEmail(email: string, resetUrl: string) {
+  if (process.env.EMAIL_TRANSPORT === "mock") return { sent: true as const, mocked: true as const };
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.RESEND_FROM_EMAIL;
+  if (!apiKey || !from) return { sent: false as const, reason: "not-configured" as const };
+  const resend = new Resend(apiKey);
+  const result = await resend.emails.send({ from, to: [email], subject: "Restablece tu contraseña de OrosBlooms", html: layout("Restablece tu contraseña", `<h1 style="margin:0;font-family:Georgia,serif;font-size:30px;font-weight:500">Restablece tu contraseña</h1><p style="color:#646960;line-height:1.7">Recibimos una solicitud para cambiar la contraseña de administración. Este enlace vence en una hora y solo puede usarse una vez.</p><p style="margin:24px 0"><a href="${escapeHtml(resetUrl)}" style="display:inline-block;padding:12px 18px;border-radius:999px;background:#4b5a43;color:#fff;text-decoration:none;font-weight:700">Crear nueva contraseña</a></p><p style="color:#747970;font-size:13px;line-height:1.6">Si no solicitaste este cambio, puedes ignorar este correo.</p>`) });
+  if (result.error) throw new Error(`Resend: ${result.error.message}`);
+  return { sent: true as const };
+}

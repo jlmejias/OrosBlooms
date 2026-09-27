@@ -13,7 +13,7 @@ type FileKey = "logo" | "favicon" | "heroImage" | "heroVideo";
 type HeroMode = "image" | "youtube" | "upload";
 function Input(props:React.ComponentProps<typeof AntInput>){return <AntInput placeholder="Escribe aquí" {...props}/>}
 const paletteKeys=["backgroundColor","foregroundColor","primaryColor","accentColor","softAccentColor"] as const;
-const originalBranding={logoUrl:"/orosblooms-logo.png",faviconUrl:"/icon.svg",backgroundColor:"#faf8f4",foregroundColor:"#292b25",primaryColor:"#59654d",accentColor:"#744448",softAccentColor:"#f8ebec"};
+const originalBranding={logoUrl:"/orosblooms-logo.png",faviconUrl:"/orosblooms-favicon.png",backgroundColor:"#faf8f4",foregroundColor:"#292b25",primaryColor:"#59654d",accentColor:"#744448",softAccentColor:"#f8ebec"};
 const initialPalette=Object.fromEntries(paletteKeys.map(key=>[key,originalBranding[key]]));
 const palettes={"Floral OrosBlooms":initialPalette,"Rosa editorial":{backgroundColor:"#FFF9F6",foregroundColor:"#342A2A",primaryColor:"#685D50",accentColor:"#A45168",softAccentColor:"#F9E6EC"},"Verde natural":{backgroundColor:"#F7F8F2",foregroundColor:"#28322A",primaryColor:"#4B654C",accentColor:"#99705F",softAccentColor:"#E8F0E3"},"Minimalista":{backgroundColor:"#FAFAF8",foregroundColor:"#292929",primaryColor:"#4C4C48",accentColor:"#777066",softAccentColor:"#F0EFEB"}};
 const schema=yup.object({brandName:yup.string().trim().min(2,"Escribe al menos 2 caracteres").max(80).required("El nombre es obligatorio"),logoAltEs:yup.string().trim().required("Describe el logotipo en español"),logoAltEn:yup.string().trim().required("Describe el logotipo en inglés"),heroImageAltEs:yup.string().trim().required("Describe la imagen en español"),heroImageAltEn:yup.string().trim().required("Describe la imagen en inglés")});
