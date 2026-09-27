@@ -10,7 +10,7 @@ export function HomeHero({locale,branding,copy}:{locale:Locale;branding:Branding
   const primaryHref=copy.primaryHref==="#flores"?"/flores":copy.primaryHref||"/flores";
   const storyHref=copy.secondaryHref||"#historia";
   const text={eyebrow:es?copy.eyebrowEs:copy.eyebrowEn,title:es?copy.titleEs:copy.titleEn,emphasis:es?copy.emphasisEs:copy.emphasisEn,description:es?copy.descriptionEs:copy.descriptionEn,primary:es?copy.primaryLabelEs:copy.primaryLabelEn,secondary:es?copy.secondaryLabelEs:copy.secondaryLabelEn,aside:es?copy.asideEs:copy.asideEn};
-  const media={videoUrl:branding.heroVideoUrl,imageUrl:branding.heroImageUrl,imageAlt:es?branding.heroImageAltEs:branding.heroImageAltEn};
+  const media={videoUrl:branding.heroVideoUrl,mode:branding.heroMediaMode,imageUrl:branding.heroImageUrl,imageAlt:es?branding.heroImageAltEs:branding.heroImageAltEn};
   return <section id="inicio" className="home-hero" aria-labelledby="home-title">
     <div className="home-hero-desktop">
       <div className="home-hero-copy">

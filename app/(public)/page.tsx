@@ -10,7 +10,19 @@ import { getBrandingSettings } from "@/lib/branding";
 import { getHeroCopy } from "@/lib/hero-copy";
 import { listProducts } from "@/services/catalog";
 
-export const metadata: Metadata = { title: "Flores para cada historia", alternates: { canonical: "/" } };
+export const metadata: Metadata = {
+  title: "Luxury Flowers, Gift Boxes & Floral Designs",
+  description: "Discover luxury flower arrangements, bloom boxes, and personalized gifts for every occasion. Thoughtfully designed by OrosBlooms.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "OrosBlooms | Luxury Flowers, Gift Boxes & Floral Designs",
+    description: "Discover luxury flower arrangements, bloom boxes, and personalized gifts for every occasion.",
+  },
+  twitter: {
+    title: "OrosBlooms | Luxury Flowers, Gift Boxes & Floral Designs",
+    description: "Discover luxury flower arrangements, bloom boxes, and personalized gifts for every occasion.",
+  },
+};
 
 export default async function HomePage() {
   const [locale, branding, heroCopy, configured, catalogProducts] = await Promise.all([

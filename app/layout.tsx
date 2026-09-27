@@ -9,22 +9,51 @@ import "./globals.css";
 const baseMetadata: Metadata = {
   metadataBase: siteUrl,
   title: { default: "OrosBlooms", template: "%s | OrosBlooms" },
-  description: "Diseño floral para momentos que se recuerdan.",
+  description: "Discover luxury flower arrangements, bloom boxes, and personalized gifts for every occasion.",
   applicationName: "OrosBlooms",
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
-    locale: "es_CR",
+    locale: "en_US",
     siteName: "OrosBlooms",
     title: "OrosBlooms",
-    description: "Diseño floral para momentos que se recuerdan.",
-    images: [{ url: "/home-hero.webp", alt: "Diseño floral OrosBlooms" }],
+    description: "Discover luxury flower arrangements, bloom boxes, and personalized gifts for every occasion.",
+    images: [{ url: "/home-hero.webp", alt: "OrosBlooms luxury floral design" }],
   },
-  twitter: { card: "summary_large_image", title: "OrosBlooms", description: "Diseño floral para momentos que se recuerdan.", images: ["/home-hero.webp"] },
+  twitter: { card: "summary_large_image", title: "OrosBlooms", description: "Discover luxury flower arrangements, bloom boxes, and personalized gifts for every occasion.", images: ["/home-hero.webp"] },
   robots: { index: true, follow: true },
 };
 
-export async function generateMetadata():Promise<Metadata>{const[branding,seo,locale]=await Promise.all([getBrandingSettings(),getSeoPolicies(),getLocale()]);const title=locale==="es"?seo.siteTitleEs:seo.siteTitleEn;const description=locale==="es"?seo.descriptionEs:seo.descriptionEn;return{...baseMetadata,description,applicationName:branding.brandName,title:{default:title,template:`%s | ${branding.brandName}`},icons:{icon:branding.faviconUrl},openGraph:{...baseMetadata.openGraph,description,siteName:branding.brandName,title,images:[{url:branding.heroImageUrl,alt:branding.heroImageAltEs}]},twitter:{...baseMetadata.twitter,description,title,images:[branding.heroImageUrl]}}}
+export async function generateMetadata(): Promise<Metadata> {
+  const [branding, seo, locale] = await Promise.all([getBrandingSettings(), getSeoPolicies(), getLocale()]);
+  const isSpanish = locale === "es";
+  const title = isSpanish ? seo.siteTitleEs : seo.siteTitleEn;
+  const description = isSpanish ? seo.descriptionEs : seo.descriptionEn;
+
+  return {
+    ...baseMetadata,
+    description,
+    applicationName: branding.brandName,
+    title: { default: title, template: `%s | ${branding.brandName}` },
+    icons: {
+      icon: [
+        { url: "/orosblooms-mark.png", type: "image/png", sizes: "192x192" },
+        { url: branding.faviconUrl },
+      ],
+      shortcut: "/orosblooms-mark.png",
+      apple: "/orosblooms-mark.png",
+    },
+    openGraph: {
+      ...baseMetadata.openGraph,
+      locale: isSpanish ? "es_CR" : "en_US",
+      description,
+      siteName: branding.brandName,
+      title,
+      images: [{ url: branding.heroImageUrl, alt: isSpanish ? branding.heroImageAltEs : branding.heroImageAltEn }],
+    },
+    twitter: { ...baseMetadata.twitter, description, title, images: [branding.heroImageUrl] },
+  };
+}
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const locale=await getLocale();

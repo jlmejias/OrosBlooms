@@ -13,7 +13,21 @@ import "./home-custom.css";
 
 export default async function PublicLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const [business,locale,branding] = await Promise.all([getBusinessSettings(),getLocale(),getBrandingSettings()]);
-  const organization = { "@context": "https://schema.org", "@type": "Florist", name: branding.brandName, url: absoluteUrl(), logo: absoluteUrl(branding.logoUrl), image: absoluteUrl(branding.heroImageUrl), description: "Diseño floral para momentos que se recuerdan.", email: business.email, telephone: business.phone, areaServed: { "@type": "City", name: business.deliveryArea } };
+  const sameAs = [business.instagram, business.facebook].filter((url) => /^https?:\/\//.test(url) && !url.includes("example.com"));
+  const organization = {
+    "@context": "https://schema.org",
+    "@type": "Florist",
+    name: branding.brandName,
+    url: absoluteUrl(),
+    logo: absoluteUrl(branding.logoUrl),
+    image: absoluteUrl(branding.heroImageUrl),
+    description: locale === "es" ? "Arreglos florales y regalos personalizados para cada ocasión." : "Luxury flower arrangements, bloom boxes, and personalized gifts for every occasion.",
+    inLanguage: locale === "es" ? "es-CR" : "en-US",
+    email: business.email,
+    telephone: business.phone,
+    areaServed: { "@type": "City", name: business.deliveryArea },
+    ...(sameAs.length ? { sameAs } : {}),
+  };
   const theme={"--background":branding.backgroundColor,"--foreground":branding.foregroundColor,"--olive":branding.primaryColor,"--olive-hover":branding.primaryColor,"--burgundy":branding.accentColor,"--focus":branding.accentColor,"--blush-soft":branding.softAccentColor} as React.CSSProperties;
   return <StoreProvider><div className="public-site" style={theme}><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(organization) }} /><ScrollReveal /><a className="skip-link" href="#main-content">{locale==="es"?"Saltar al contenido":"Skip to content"}</a><HomeHeader locale={locale} logoUrl={branding.logoUrl} logoAlt={locale==="es"?branding.logoAltEs:branding.logoAltEn}/>{children}<HomeFooter locale={locale}/><MobileBottomNav locale={locale}/></div></StoreProvider>;
 }

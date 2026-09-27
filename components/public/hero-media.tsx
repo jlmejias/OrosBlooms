@@ -3,10 +3,10 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
-type HeroMediaProps = { mobile?: boolean; videoUrl:string; imageUrl:string; imageAlt:string };
+type HeroMediaProps = { mobile?: boolean; mode:"image"|"image-video"; videoUrl:string; imageUrl:string; imageAlt:string };
 function youtubeEmbedUrl(url:string){try{const parsed=new URL(url);const id=parsed.hostname.includes("youtu.be")?parsed.pathname.slice(1):parsed.searchParams.get("v")??(parsed.pathname.startsWith("/embed/")?parsed.pathname.split("/")[2]:null);return id&&/^[\w-]{11}$/.test(id)?`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&playsinline=1&rel=0`:null;}catch{return null;}}
 
-export function HeroMedia({ mobile = false, videoUrl, imageUrl, imageAlt }: HeroMediaProps) {
+export function HeroMedia({ mobile = false, mode, videoUrl, imageUrl, imageAlt }: HeroMediaProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [loadVideo, setLoadVideo] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -17,7 +17,7 @@ export function HeroMedia({ mobile = false, videoUrl, imageUrl, imageAlt }: Hero
     let loadTimer: number | undefined;
     const update = () => {
       // La variante móvil usa exclusivamente el poster para no descargar un video de ~20 MB.
-      const matchesViewport = !mobile && !viewport.matches;
+      const matchesViewport = mode === "image-video" && !mobile && !viewport.matches;
       window.clearTimeout(loadTimer);
       if (!motion.matches && matchesViewport) {
         loadTimer = window.setTimeout(() => setLoadVideo(true), 900);
@@ -35,7 +35,7 @@ export function HeroMedia({ mobile = false, videoUrl, imageUrl, imageAlt }: Hero
       motion.removeEventListener("change", update);
       viewport.removeEventListener("change", update);
     };
-  }, [mobile]);
+  }, [mobile, mode]);
 
   const playManually = () => {
     setLoadVideo(true);
@@ -44,7 +44,7 @@ export function HeroMedia({ mobile = false, videoUrl, imageUrl, imageAlt }: Hero
 
   const youtubeUrl=youtubeEmbedUrl(videoUrl);
   return <div className={`home-hero-media${playing ? " is-playing" : ""}`}>
-    <div className="home-hero-video">
+    {mode === "image-video" && <div className="home-hero-video">
       {loadVideo&&youtubeUrl?<iframe src={youtubeUrl} title="Video de portada" allow="autoplay; encrypted-media; picture-in-picture" tabIndex={-1} aria-hidden="true" onLoad={() => setPlaying(true)}/>:loadVideo&&<video
         ref={videoRef}
         src={videoUrl}
@@ -58,7 +58,7 @@ export function HeroMedia({ mobile = false, videoUrl, imageUrl, imageAlt }: Hero
         onPlaying={() => setPlaying(true)}
         onError={() => setPlaying(false)}
       />}
-    </div>
+    </div>}
     <Image
       src={imageUrl}
       alt={imageAlt}
@@ -68,7 +68,7 @@ export function HeroMedia({ mobile = false, videoUrl, imageUrl, imageAlt }: Hero
       className={`home-cover home-hero-poster ${mobile ? "home-mobile-hero-photo" : "home-hero-photo"}`}
       unoptimized
     />
-    {!mobile && <button type="button" className="home-hero-photo-label" onClick={playManually} aria-label="Reproducir video de OrosBlooms">
+    {!mobile && mode === "image-video" && <button type="button" className="home-hero-photo-label" onClick={playManually} aria-label="Reproducir video de OrosBlooms">
       <span className="home-hero-play-mark" aria-hidden="true">▶</span><span>01 / HECHO A MANO</span>
     </button>}
   </div>;
