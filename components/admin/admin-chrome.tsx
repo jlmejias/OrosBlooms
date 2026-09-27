@@ -3,6 +3,7 @@
 import { App, Avatar, Button, ConfigProvider, Drawer, Layout, Menu, Tooltip, Typography } from "antd";
 import { AppstoreOutlined, BgColorsOutlined, CustomerServiceOutlined, FileImageOutlined, FileProtectOutlined, HomeOutlined, InboxOutlined, LogoutOutlined, MenuOutlined, PictureOutlined, SettingOutlined, ShoppingOutlined, ShoppingCartOutlined, TagsOutlined, TeamOutlined, ToolOutlined } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
 import { useState } from "react";
 import { logoutAdmin } from "@/app/admin/actions";
 import { FormExperience } from "@/components/shared/form-experience";
@@ -20,8 +21,8 @@ export function AdminChrome({ email, children }: { email: string; children: Reac
   const navigate = (key: string) => { setMenuOpen(false); router.push(key); };
   const user = <div className="admin-ant-user"><Avatar size={38} icon={<CustomerServiceOutlined />} /><div><Typography.Text ellipsis>{email}</Typography.Text><small>Equipo OrosBlooms</small></div><Tooltip title="Cerrar sesión"><form action={logoutAdmin}><Button htmlType="submit" type="text" icon={<LogoutOutlined />} aria-label="Cerrar sesión" /></form></Tooltip></div>;
   return <ConfigProvider theme={{ token: { colorPrimary: "#4b5a43", colorInfo: "#4b5a43", borderRadius: 14, fontFamily: "var(--font-body), Arial, sans-serif", colorBgLayout: "#f4f1ea" }, components: { Menu: { darkItemBg: "#263228", darkItemSelectedBg: "#566851", darkSubMenuItemBg: "#263228" } } }}><FormExperience/><App><Layout className="admin-ant-shell">
-    <Layout.Sider className="admin-ant-sider" width={264}><div className="admin-ant-brand"><span>✦</span><div><strong>OrosBlooms</strong><small>Administración</small></div></div><Menu theme="dark" mode="inline" selectedKeys={[selected]} items={items} onClick={({ key }) => navigate(key)} />{user}</Layout.Sider>
-    <Layout className="admin-main-layout"><header className="admin-mobile-header"><Button type="text" icon={<MenuOutlined />} aria-label="Abrir menú de administración" onClick={() => setMenuOpen(true)} /><strong>OrosBlooms</strong></header><Layout.Content className="admin-ant-content">{children}</Layout.Content></Layout>
+    <Layout.Sider className="admin-ant-sider" width={264}><div className="admin-ant-brand"><div className="admin-ant-brand-logo"><Image src="/orosblooms-logo.png" alt="OrosBlooms" width={166} height={73} priority/></div><div className="admin-ant-brand-label"><span>Floral studio</span><small>Administración</small></div></div><Menu theme="dark" mode="inline" selectedKeys={[selected]} items={items} onClick={({ key }) => navigate(key)} />{user}</Layout.Sider>
+    <Layout className="admin-main-layout"><header className="admin-mobile-header"><Button type="text" icon={<MenuOutlined />} aria-label="Abrir menú de administración" onClick={() => setMenuOpen(true)} /><Image src="/orosblooms-logo.png" alt="OrosBlooms" width={102} height={45}/></header><Layout.Content className="admin-ant-content">{children}</Layout.Content></Layout>
     <Drawer className="admin-mobile-drawer" title="Administración" placement="left" size="min(86vw, 320px)" open={menuOpen} onClose={() => setMenuOpen(false)}><Menu mode="inline" selectedKeys={[selected]} items={items} onClick={({ key }) => navigate(key)} />{user}</Drawer>
   </Layout></App></ConfigProvider>;
 }
