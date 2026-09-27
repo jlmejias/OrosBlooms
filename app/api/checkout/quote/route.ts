@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     const business = (businessRow?.value ?? {}) as Record<string, unknown>;
     const configuredDeliveryFee = Number(business.deliveryFee ?? process.env.DELIVERY_FEE_USD ?? 0);
     const deliveryFee = parsed.data.fulfillment === "delivery" && Number.isFinite(configuredDeliveryFee) ? configuredDeliveryFee : 0;
-    const depositPercent = Number(business.depositPercent ?? 100);
+    const depositPercent = Number(business.depositPercent ?? 50);
     return NextResponse.json(calculateOrderPricing(subtotal, deliveryFee, depositPercent));
   } catch (error) {
     console.error("checkout_quote_failed", error);

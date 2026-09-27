@@ -19,7 +19,7 @@ try {
   if (!exists.rowCount) await admin.query(`CREATE DATABASE "${database.replaceAll('"', '""')}"`);
 } finally { await admin.end(); }
 
-const env = { ...process.env, DATABASE_URL: url.toString(), NODE_ENV: "test", EMAIL_TRANSPORT: "mock", SINPE_MOBILE_NUMBER: process.env.SINPE_MOBILE_NUMBER || "70000000" };
+const env = { ...process.env, DATABASE_URL: url.toString(), NODE_ENV: "test", EMAIL_TRANSPORT: "mock", ZELLE_RECIPIENT: process.env.ZELLE_RECIPIENT || "payments@orosblooms.qa" };
 for (const args of [["run", "db:migrate"], ["run", "db:clear", "--", "--confirm"], ["run", "db:seed"], ["run", "db:check-business"]]) {
   const result = spawnSync("npm", args, { cwd: process.cwd(), env, stdio: "inherit", shell: process.platform === "win32" });
   if (result.status !== 0) process.exit(result.status ?? 1);

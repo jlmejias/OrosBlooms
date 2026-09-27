@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     const bytes = new Uint8Array(await file.arrayBuffer());
     if (!hasValidImageSignature(bytes, file.type)) return NextResponse.json({ error: "El contenido del archivo no coincide con una imagen permitida." }, { status: 400 });
 
-    const [order] = await db.select({ id: orders.id, status: orders.status, paymentStatus: orders.paymentStatus, proofAssetId: orders.paymentProofAssetId, oldProviderId: mediaAssets.providerId, customerName: customers.name, customerEmail: customers.email }).from(orders).leftJoin(mediaAssets, eq(mediaAssets.id, orders.paymentProofAssetId)).leftJoin(customers, eq(customers.id, orders.customerId)).where(and(eq(orders.reference, reference), eq(orders.trackingToken, token), eq(orders.paymentMethod, "sinpe"))).limit(1);
+    const [order] = await db.select({ id: orders.id, status: orders.status, paymentStatus: orders.paymentStatus, proofAssetId: orders.paymentProofAssetId, oldProviderId: mediaAssets.providerId, customerName: customers.name, customerEmail: customers.email }).from(orders).leftJoin(mediaAssets, eq(mediaAssets.id, orders.paymentProofAssetId)).leftJoin(customers, eq(customers.id, orders.customerId)).where(and(eq(orders.reference, reference), eq(orders.trackingToken, token), inArray(orders.paymentMethod, ["zelle", "sinpe"]))).limit(1);
     if (!order) return NextResponse.json({ error: "Pedido no encontrado." }, { status: 404 });
     if (order.status === "cancelled" || !["unpaid", "failed"].includes(order.paymentStatus)) return NextResponse.json({ error: order.paymentStatus === "pending_review" ? "El comprobante ya está pendiente de revisión." : "Este pedido ya no admite comprobantes." }, { status: 409 });
 
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     const blob = await uploadPrivateBlob(`payments/${randomUUID()}.${extension}`, file);
     uploadedPath = blob.pathname;
     await db.transaction(async tx => {
-      const [asset] = await tx.insert(mediaAssets).values({ provider: "neon-object-storage-private", providerId: blob.pathname, url: blob.url, bytes: file.size, format: extension, alt: `Comprobante SINPE ${reference}`, visibility: "private" }).returning({ id: mediaAssets.id });
+      const [asset] = await tx.insert(mediaAssets).values({ provider: "neon-object-storage-private", providerId: blob.pathname, url: blob.url, bytes: file.size, format: extension, alt: `Comprobante Zelle ${reference}`, visibility: "private" }).returning({ id: mediaAssets.id });
       const [updated] = await tx.update(orders).set({ paymentProofAssetId: asset.id, paymentStatus: "pending_review", updatedAt: new Date() }).where(and(eq(orders.id, order.id), inArray(orders.paymentStatus, ["unpaid", "failed"]))).returning({ id: orders.id });
       if (!updated) throw new Error("proof_state_conflict");
     });

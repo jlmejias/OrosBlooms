@@ -2,6 +2,7 @@ import { StoreProvider } from "@/components/commerce/store-provider";
 import { HomeHeader, MobileBottomNav } from "@/components/public/home-header";
 import { HomeFooter } from "@/components/public/home-sections";
 import { ScrollReveal } from "@/components/public/scroll-reveal";
+import { VisitorTracker } from "@/components/public/visitor-tracker";
 import { absoluteUrl, jsonLd } from "@/lib/site";
 import { getBusinessSettings } from "@/lib/business";
 import { getLocale } from "@/lib/i18n";
@@ -29,5 +30,5 @@ export default async function PublicLayout({ children }: Readonly<{ children: Re
     ...(sameAs.length ? { sameAs } : {}),
   };
   const theme={"--background":branding.backgroundColor,"--foreground":branding.foregroundColor,"--olive":branding.primaryColor,"--olive-hover":branding.primaryColor,"--burgundy":branding.accentColor,"--focus":branding.accentColor,"--blush-soft":branding.softAccentColor} as React.CSSProperties;
-  return <StoreProvider><div className="public-site" style={theme}><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(organization) }} /><ScrollReveal /><a className="skip-link" href="#main-content">{locale==="es"?"Saltar al contenido":"Skip to content"}</a><HomeHeader locale={locale} logoUrl={branding.logoUrl} logoAlt={locale==="es"?branding.logoAltEs:branding.logoAltEn}/>{children}<HomeFooter locale={locale}/><MobileBottomNav locale={locale}/></div></StoreProvider>;
+  return <StoreProvider><div className="public-site" style={theme}><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(organization) }} /><ScrollReveal /><VisitorTracker /><a className="skip-link" href="#main-content">{locale==="es"?"Saltar al contenido":"Skip to content"}</a><HomeHeader locale={locale} logoUrl={branding.logoUrl} logoAlt={locale==="es"?branding.logoAltEs:branding.logoAltEn}/>{children}<HomeFooter locale={locale}/><MobileBottomNav locale={locale}/></div></StoreProvider>;
 }

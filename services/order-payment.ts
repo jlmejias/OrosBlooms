@@ -1,13 +1,13 @@
 import { and, eq, gte, isNull, or, sql } from "drizzle-orm";
 import { db } from "@/db/client";
-import { orderInventoryItems, orders, productVariants } from "@/db/schema";
+import { customers, orderInventoryItems, orders, productVariants } from "@/db/schema";
 
 export async function reviewOrderPaymentById(id: string, paymentStatus: "paid" | "failed") {
   return db.transaction(async tx => {
     await tx.execute(sql`SELECT id FROM orders WHERE id = ${id} FOR UPDATE`);
-    const [order] = await tx.select({ paymentStatus: orders.paymentStatus, status: orders.status }).from(orders).where(eq(orders.id, id)).limit(1);
+    const [order] = await tx.select({ paymentStatus: orders.paymentStatus, status: orders.status, reference: orders.reference, balance: orders.balance, customerName: customers.name, customerEmail: customers.email }).from(orders).innerJoin(customers, eq(customers.id, orders.customerId)).where(eq(orders.id, id)).limit(1);
     if (!order) throw new Error("Pedido no encontrado.");
-    if (order.paymentStatus === paymentStatus) return { changed: false };
+    if (order.paymentStatus === paymentStatus) return { changed: false as const };
     if (order.paymentStatus !== "pending_review") throw new Error("Solo se puede revisar un pago pendiente.");
     if (paymentStatus === "paid") {
       const items = await tx.select({ variantId: orderInventoryItems.variantId, quantity: orderInventoryItems.quantity }).from(orderInventoryItems).where(eq(orderInventoryItems.orderId, id));
@@ -17,6 +17,6 @@ export async function reviewOrderPaymentById(id: string, paymentStatus: "paid" |
       }
     }
     await tx.update(orders).set({ paymentStatus, status: paymentStatus === "paid" && order.status === "pending" ? "confirmed" : order.status, updatedAt: new Date() }).where(eq(orders.id, id));
-    return { changed: true };
+    return { changed: true as const, reference: order.reference, balance: order.balance, customerName: order.customerName, customerEmail: order.customerEmail ?? undefined, paymentStatus };
   });
 }

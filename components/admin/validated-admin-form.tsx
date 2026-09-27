@@ -5,7 +5,7 @@ import { unstable_rethrow } from "next/navigation";
 import * as yup from "yup";
 import { useEffect, useRef, useState } from "react";
 
-type Props={action:(formData:FormData)=>void|Promise<void>;children:React.ReactNode;required?:string[];email?:string[];submitLabel?:string;className?:string;encType?:string;onSuccess?:()=>void;prepareFormData?:(formData:FormData)=>FormData};
+type Props={action:(formData:FormData)=>void|Promise<unknown>;children:React.ReactNode;required?:string[];email?:string[];submitLabel?:string;className?:string;encType?:string;onSuccess?:()=>void;prepareFormData?:(formData:FormData)=>FormData};
 function serverError(error: unknown) { const message=error instanceof Error?error.message:"No se pudo guardar. Revisa los datos e inténtalo nuevamente."; const match=/^\[field:([^\]]+)\]\s*(.*)$/.exec(message); if(match)return{field:match[1],message:match[2]};const internal=/failed query|insert into|update .* returning|params:|drizzle|Minified React error|Server Components render/i.test(message);return{field:"form",message:internal?"No se pudo completar la operación en este momento. Inténtalo nuevamente.":message}; }
 export function ValidatedAdminForm({action,children,required=[],email=[],submitLabel="Guardar",className="admin-form",encType,onSuccess,prepareFormData}:Props){
   const { message: toast }=App.useApp();const formRef=useRef<HTMLFormElement>(null); const [message,setMessage]=useState("");

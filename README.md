@@ -1,6 +1,6 @@
 # OrosBlooms
 
-Aplicación floral bilingüe con catálogo, carrito, checkout SINPE, solicitudes personalizadas y panel administrativo.
+Aplicación floral bilingüe con catálogo, carrito, checkout Zelle, solicitudes personalizadas y panel administrativo.
 
 ## Desarrollo local
 

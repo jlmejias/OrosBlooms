@@ -13,19 +13,20 @@ const productLineSchema = z.object({ kind: z.literal("product"), productId: z.st
 const comboLineSchema = z.object({ kind: z.literal("combo"), comboId: z.string().uuid(), quantity: z.number().int().min(1).max(20), personalization: z.string().trim().max(500).optional() });
 const bodySchema = z.object({
   name: z.string().trim().min(2).max(120),
-  email: z.email().optional().or(z.literal("")),
+  email: z.email(),
   phone: z.string().trim().min(7).max(30),
   fulfillment: z.enum(["delivery", "pickup"]),
   deliveryAddress: z.string().trim().max(500).optional(),
-  paymentMethod: z.literal("sinpe"),
+  paymentMethod: z.literal("zelle"),
+  paymentOption: z.enum(["deposit", "full"]).default("deposit"),
   items: z.array(z.discriminatedUnion("kind", [productLineSchema, comboLineSchema])).min(1).max(30),
 }).refine(value => value.fulfillment === "pickup" || Boolean(value.deliveryAddress), { message: "Dirección requerida para entrega" });
 
 type OrderLine = { productId?: string; variantId?: string; comboId?: string; name: string; unitPrice: number; quantity: number; personalization?: string };
 class CheckoutError extends Error { constructor(message: string, readonly status = 409) { super(message); } }
 
-function responseFor(order: { reference: string; trackingToken: string; deposit: number }) {
-  return { reference: order.reference, trackingToken: order.trackingToken, trackingUrl: `/pedido/${order.reference}?token=${order.trackingToken}`, sinpeNumber: process.env.SINPE_MOBILE_NUMBER || null, amount: order.deposit };
+function responseFor(order: { reference: string; trackingToken: string; total: number; deposit: number; balance: number }) {
+  return { reference: order.reference, trackingToken: order.trackingToken, trackingUrl: `/pedido/${order.reference}?token=${order.trackingToken}`, zelleRecipient: process.env.ZELLE_RECIPIENT || null, amount: order.deposit, total: order.total, balance: order.balance };
 }
 
 export async function POST(request: Request) {
@@ -37,11 +38,11 @@ export async function POST(request: Request) {
     const rawBody: unknown = await request.json().catch(() => null);
     const parsed = bodySchema.safeParse(rawBody);
     if (!parsed.success) return NextResponse.json({ error: "Datos de compra inválidos." }, { status: 400 });
-    if (!process.env.SINPE_MOBILE_NUMBER) return NextResponse.json({ error: "SINPE Móvil todavía no está configurado. Intenta de nuevo más tarde o contáctanos." }, { status: 503 });
+    if (!process.env.ZELLE_RECIPIENT) return NextResponse.json({ error: "Zelle todavía no está configurado. Intenta de nuevo más tarde o contáctanos." }, { status: 503 });
     const value = parsed.data;
 
     const result = await db.transaction(async tx => {
-      const [existing] = await tx.select({ reference: orders.reference, trackingToken: orders.trackingToken, deposit: orders.deposit }).from(orders).where(eq(orders.idempotencyKey, idempotencyKey)).limit(1);
+      const [existing] = await tx.select({ reference: orders.reference, trackingToken: orders.trackingToken, total: orders.total, deposit: orders.deposit, balance: orders.balance }).from(orders).where(eq(orders.idempotencyKey, idempotencyKey)).limit(1);
       if (existing) return existing;
 
       const directProductIds = value.items.flatMap(item => item.kind === "product" ? [item.productId] : []);
@@ -91,8 +92,9 @@ export async function POST(request: Request) {
       const business = (businessRow?.value ?? {}) as Record<string, unknown>;
       const configuredDeliveryFee = Number(business.deliveryFee ?? process.env.DELIVERY_FEE_USD ?? 0);
       const deliveryFee = value.fulfillment === "delivery" && Number.isFinite(configuredDeliveryFee) ? Math.max(0, Math.round(configuredDeliveryFee)) : 0;
-      const depositPercent = Math.min(100, Math.max(0, Number(business.depositPercent ?? 100)));
-      const pricing = calculateOrderPricing(subtotal, deliveryFee, depositPercent);
+      const depositPercent = Math.min(100, Math.max(0, Number(business.depositPercent ?? 50)));
+      const quotedPricing = calculateOrderPricing(subtotal, deliveryFee, depositPercent);
+      const pricing = value.paymentOption === "full" ? { ...quotedPricing, depositPercent: 100, deposit: quotedPricing.total, balance: 0 } : quotedPricing;
       const normalizedEmail = normalizeEmail(value.email);
       const normalizedPhone = normalizePhone(value.phone);
       const identityKey = customerIdentityKey(normalizedEmail, normalizedPhone);
@@ -101,12 +103,13 @@ export async function POST(request: Request) {
       if (!customerId) throw new Error("customer_identity_resolution_failed");
       const reference = `PED-${randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase()}`;
       const trackingToken = randomUUID().replaceAll("-", "");
-      const [order] = await tx.insert(orders).values({ reference, idempotencyKey, trackingToken, customerId, fulfillment: value.fulfillment, deliveryAddress: value.deliveryAddress || null, subtotal: pricing.subtotal, deliveryFee: pricing.deliveryFee, total: pricing.total, deposit: pricing.deposit, balance: pricing.balance, paymentMethod: "sinpe", paymentStatus: "unpaid", status: "pending" }).returning({ id: orders.id, reference: orders.reference, trackingToken: orders.trackingToken, deposit: orders.deposit });
+      const [order] = await tx.insert(orders).values({ reference, idempotencyKey, trackingToken, customerId, fulfillment: value.fulfillment, deliveryAddress: value.deliveryAddress || null, subtotal: pricing.subtotal, deliveryFee: pricing.deliveryFee, total: pricing.total, deposit: pricing.deposit, balance: pricing.balance, paymentMethod: "zelle", paymentStatus: "unpaid", status: "pending" }).returning({ id: orders.id, reference: orders.reference, trackingToken: orders.trackingToken, total: orders.total, deposit: orders.deposit, balance: orders.balance });
       await tx.insert(orderItems).values(lines.map(line => ({ orderId: order.id, productId: line.productId, variantId: line.variantId, comboId: line.comboId, nameSnapshot: line.name, unitPriceSnapshot: line.unitPrice, quantity: line.quantity, personalization: line.personalization ? { message: line.personalization } : null, lineTotal: line.unitPrice * line.quantity })));
       if (inventory.size) await tx.insert(orderInventoryItems).values([...inventory].map(([variantId, quantity]) => ({ orderId: order.id, variantId, quantity })));
       return order;
     });
-    await sendOrderCreatedEmails({ reference: result.reference, name: value.name, email: value.email || undefined, phone: value.phone, fulfillment: value.fulfillment, amount: result.deposit, sinpeNumber: process.env.SINPE_MOBILE_NUMBER }).catch(error => console.error("order_email_failed", { reference: result.reference, error }));
+    const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+    await sendOrderCreatedEmails({ reference: result.reference, name: value.name, email: value.email || undefined, phone: value.phone, fulfillment: value.fulfillment, amount: result.deposit, total: result.total, balance: result.balance, zelleRecipient: process.env.ZELLE_RECIPIENT, trackingUrl: `${siteUrl}/pedido/${result.reference}?token=${result.trackingToken}` }).catch(error => console.error("order_email_failed", { reference: result.reference, error }));
     return NextResponse.json(responseFor(result));
   } catch (error) {
     if (error instanceof CheckoutError) return NextResponse.json({ error: error.message }, { status: error.status });
