@@ -24,6 +24,11 @@ const bodySchema = z.object({
 
 type OrderLine = { productId?: string; variantId?: string; comboId?: string; name: string; unitPrice: number; quantity: number; personalization?: string };
 class CheckoutError extends Error { constructor(message: string, readonly status = 409) { super(message); } }
+function postgresCode(error: unknown) {
+  if (typeof error !== "object" || error === null) return undefined;
+  if ("code" in error && typeof error.code === "string") return error.code;
+  return "cause" in error && typeof error.cause === "object" && error.cause !== null && "code" in error.cause && typeof error.cause.code === "string" ? error.cause.code : undefined;
+}
 
 function responseFor(order: { reference: string; trackingToken: string; total: number; deposit: number; balance: number }) {
   return { reference: order.reference, trackingToken: order.trackingToken, trackingUrl: `/pedido/${order.reference}?token=${order.trackingToken}`, zelleRecipient: process.env.ZELLE_RECIPIENT || null, amount: order.deposit, total: order.total, balance: order.balance };
@@ -113,8 +118,14 @@ export async function POST(request: Request) {
     return NextResponse.json(responseFor(result));
   } catch (error) {
     if (error instanceof CheckoutError) return NextResponse.json({ error: error.message }, { status: error.status });
-    const isDuplicate = typeof error === "object" && error !== null && "code" in error && error.code === "23505";
-    if (isDuplicate) return NextResponse.json({ error: "La solicitud ya está siendo procesada. Intenta nuevamente." }, { status: 409 });
+    if (postgresCode(error) === "23505") {
+      const idempotencyKey = request.headers.get("idempotency-key")?.trim();
+      if (idempotencyKey) {
+        const [existing] = await db.select({ reference: orders.reference, trackingToken: orders.trackingToken, total: orders.total, deposit: orders.deposit, balance: orders.balance }).from(orders).where(eq(orders.idempotencyKey, idempotencyKey)).limit(1);
+        if (existing) return NextResponse.json(responseFor(existing));
+      }
+      return NextResponse.json({ error: "La solicitud ya está siendo procesada. Intenta nuevamente." }, { status: 409 });
+    }
     console.error("checkout_failed", error);
     return NextResponse.json({ error: "No se pudo crear el pedido." }, { status: 500 });
   }

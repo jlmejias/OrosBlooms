@@ -17,6 +17,7 @@
     "db:check": "node --experimental-strip-types scripts/check-db.ts",
     "db:seed": "node --experimental-strip-types scripts/seed-db.ts",
     "db:clear": "node scripts/clear-db.cjs",
+    "qa:cleanup-files": "node scripts/cleanup-e2e-files.cjs",
     "db:check-business": "node --experimental-strip-types scripts/check-business-db.ts",
     "qa:setup": "node scripts/qa-setup.mjs",
     "test:e2e": "npm run build && playwright test"

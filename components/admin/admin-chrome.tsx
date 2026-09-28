@@ -9,7 +9,7 @@ import { logoutAdmin } from "@/app/admin/actions";
 import { FormExperience } from "@/components/shared/form-experience";
 
 const navigation = [
-  ["Resumen", "/admin", HomeOutlined], ["Identidad", "/admin/identidad", BgColorsOutlined], ["Categorías", "/admin/categorias", TagsOutlined], ["Productos", "/admin/productos", ShoppingOutlined], ["Combos", "/admin/combos", AppstoreOutlined], ["Galería", "/admin/galeria", PictureOutlined], ["Servicios", "/admin/servicios", ToolOutlined], ["Solicitudes", "/admin/solicitudes", InboxOutlined], ["Clientes", "/admin/clientes", TeamOutlined], ["Pedidos", "/admin/pedidos", ShoppingCartOutlined], ["Portada", "/admin/inicio", HomeOutlined], ["Multimedia", "/admin/multimedia", FileImageOutlined], ["SEO y políticas", "/admin/seo-politicas", FileProtectOutlined], ["Configuración", "/admin/configuracion", SettingOutlined],
+  ["Resumen", "/admin", HomeOutlined], ["Identidad", "/admin/identidad", BgColorsOutlined], ["Categorías", "/admin/categorias", TagsOutlined], ["Productos", "/admin/productos", ShoppingOutlined], ["Combos", "/admin/combos", AppstoreOutlined], ["Galería", "/admin/galeria", PictureOutlined], ["Servicios", "/admin/servicios", ToolOutlined], ["Páginas", "/admin/paginas", FileProtectOutlined], ["Solicitudes", "/admin/solicitudes", InboxOutlined], ["Clientes", "/admin/clientes", TeamOutlined], ["Pedidos", "/admin/pedidos", ShoppingCartOutlined], ["Contenido de inicio", "/admin/inicio", HomeOutlined], ["Multimedia", "/admin/multimedia", FileImageOutlined], ["SEO y políticas", "/admin/seo-politicas", FileProtectOutlined], ["Configuración", "/admin/configuracion", SettingOutlined],
 ] as const;
 
 export function AdminChrome({ email, children }: { email: string; children: React.ReactNode }) {

@@ -8,6 +8,7 @@ import { getBrandingSettings } from "@/lib/branding";
 import { homepageSectionDefaults, type HomepageSectionKey } from "@/lib/homepage";
 import type { Locale } from "@/lib/i18n";
 import { formatCRC } from "@/lib/format";
+import { defaultPageContent, type PageContent, type PageImage } from "@/lib/service-page";
 
 type EditableContent = Record<string, unknown> | undefined;
 
@@ -75,9 +76,10 @@ export function HomeEvents({locale}:{locale:Locale}) {
   return <section id="eventos" className="home-events home-section"><Container><div className="home-events-grid"><div><p className="home-eyebrow">{es?"Celebraciones a tu manera":"Celebrations your way"}</p><h2>{es?<>Momentos que<br/><em>florecen juntos.</em></>:<>Moments that<br/><em>bloom together.</em></>}</h2><p>{es?"Cumpleaños, graduaciones, reuniones y encuentros que merecen recordarse.":"Birthdays, graduations and gatherings worth remembering."}</p><a className="home-inline-link" href="/galeria">{es?"Ver nuestra inspiración":"See our inspiration"} <Icon name="arrow" size={18}/></a></div><div className="home-events-image"><Image src="/home-sunflowers.webp" alt={es?"Ramo de girasoles para una celebración":"Sunflower bouquet for a celebration"} fill sizes="(max-width: 1024px) 100vw, 45vw" className="home-cover"/></div></div></Container></section>;
 }
 
-export function HomePersonalized({locale}:{locale:Locale}) {
+export function HomePersonalized({locale,content}:{locale:Locale;content?:Partial<PageContent>&{images?:PageImage[]}}) {
   const es=locale==="es";
-  return <section id="personalizados" className="home-personalized home-section"><Container><div className="home-personalized-panel"><div><p className="home-eyebrow">{es?"Un detalle más":"One more detail"}</p><h2>{es?<>Tu idea.<br/><em>Nuestra inspiración.</em></>:<>Your idea.<br/><em>Our inspiration.</em></>}</h2><p>{es?"Las flores llevan el mensaje. Un detalle personalizado puede hacerlo todavía más tuyo.":"Flowers carry the message. A personalized detail can make it even more yours."}</p><a className="home-inline-link" href="/crear-regalo">{es?"Crear un regalo":"Create a gift"} <Icon name="arrow" size={18}/></a></div><div className="home-personalized-visual"><div className="home-personalized-photo"><Image src="/home-hero.webp" alt={es?"Detalle floral en tonos rosados":"Floral detail in blush tones"} fill sizes="(max-width: 1024px) 80vw, 32vw" className="home-cover"/></div><span>{es?"Detalles que se recuerdan.":"Details to remember."}</span></div></div></Container></section>;
+  const page={...defaultPageContent("personalizados"),...content};const image=page.images?.[0]?.url??"/home-hero.webp";
+  return <section id="personalizados" className="home-personalized home-section"><Container><div className="home-personalized-panel"><div><p className="home-eyebrow">{es?"Un detalle más":"One more detail"}</p><h2>{es?page.detailTitleEs:page.detailTitleEn}</h2><p>{es?page.detailBodyOneEs:page.detailBodyOneEn}</p>{(es?page.detailBodyTwoEs:page.detailBodyTwoEn)&&<p>{es?page.detailBodyTwoEs:page.detailBodyTwoEn}</p>}<a className="home-inline-link" href="/crear-regalo">{es?page.ctaLabelEs:page.ctaLabelEn} <Icon name="arrow" size={18}/></a></div><div className="home-personalized-visual"><div className="home-personalized-photo"><Image src={image} alt={es?page.imageAltEs:page.imageAltEn} fill sizes="(max-width: 1024px) 80vw, 32vw" className="home-cover"/></div><span>{es?"Detalles que se recuerdan.":"Details to remember."}</span></div></div></Container></section>;
 }
 
 type GalleryDisplayItem={url:string;alt:string};

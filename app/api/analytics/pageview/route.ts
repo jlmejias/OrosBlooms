@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/db/client";
 import { pageViews } from "@/db/schema";
+import { visitorLocationFromHeaders } from "@/lib/visitor-location";
 
 const visitorCookie = "oros_visitor";
 const cookieLifetime = 60 * 60 * 24 * 30;
@@ -26,8 +27,9 @@ export async function POST(request: NextRequest) {
   const hasValidVisitor = Boolean(currentVisitor && /^[a-f0-9-]{36}$/i.test(currentVisitor));
   const visitor = hasValidVisitor ? currentVisitor! : randomUUID();
   const visitorHash = createHash("sha256").update(visitor).digest("hex");
+  const location = visitorLocationFromHeaders(request.headers);
 
-  await db.insert(pageViews).values({ visitorHash, path: parsed.data.path });
+  await db.insert(pageViews).values({ visitorHash, path: parsed.data.path, ...location });
 
   const response = new NextResponse(null, { status: 204, headers: { "Cache-Control": "no-store" } });
   if (!hasValidVisitor) response.cookies.set(visitorCookie, visitor, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: cookieLifetime });

@@ -56,7 +56,7 @@ export function ServiceManager({ items, translations }: {
       onCancel={close}
       footer={null}
       destroyOnHidden
-      width={720}
+      width={920}
       centered
       modalRender={modal => <DraggableModal>{modal}</DraggableModal>}
     >

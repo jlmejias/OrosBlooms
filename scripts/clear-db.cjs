@@ -1,15 +1,11 @@
 const { loadEnvConfig } = require("@next/env");
 const { Pool } = require("pg");
+const { assertSafeE2eDatabaseUrl } = require("./e2e-safety.cjs");
 
 loadEnvConfig(process.cwd());
 
 const confirmationFlag = "--confirm";
 const migrationTable = "__drizzle_migrations";
-
-function isLocalDatabase(databaseUrl) {
-  const host = new URL(databaseUrl).hostname;
-  return host === "localhost" || host === "127.0.0.1" || host === "::1";
-}
 
 function quoteIdentifier(identifier) {
   return `"${identifier.replaceAll('"', '""')}"`;
@@ -25,9 +21,7 @@ async function main() {
     throw new Error(`Esta acción elimina todos los datos. Ejecútala con: npm run db:clear -- ${confirmationFlag}`);
   }
 
-  if (!isLocalDatabase(databaseUrl)) {
-    throw new Error("Por seguridad, db:clear solo permite una DATABASE_URL local.");
-  }
+  assertSafeE2eDatabaseUrl(databaseUrl);
 
   const pool = new Pool({ connectionString: databaseUrl });
   try {

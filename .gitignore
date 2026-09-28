@@ -1,6 +1,7 @@
 node_modules/
 .npm-cache/
 .next/
+.next-e2e/
 out/
 .env
 .env.local
@@ -10,3 +11,4 @@ next-env.d.ts
 test-results/
 playwright-report/
 storage/object-storage/
+.data/e2e-uploads/

@@ -6,12 +6,11 @@ import { db } from "@/db/client";
 import { users } from "@/db/schema";
 import { verifyPassword } from "@/lib/password";
 import { createAdminSessionToken, verifyAdminSessionToken } from "@/lib/admin-session";
+import { acceptsDevelopmentAdminCredentials, adminSessionSecret } from "@/lib/admin-auth-policy";
 
 const COOKIE = "oros_admin_session";
 const maxAge = 60 * 60 * 8;
 const defaultAdminUsername = "OrosBlooms";
-const explicitLocalFallback = () => process.env.NODE_ENV === "development" && process.env.ALLOW_INSECURE_LOCAL_ADMIN === "true";
-function secret() { const value = process.env.ADMIN_SESSION_SECRET?.trim(); if (value && value.length >= 32) return value; if (explicitLocalFallback()) return "orosblooms-explicit-local-development-secret-change-me"; throw new Error("ADMIN_SESSION_SECRET debe tener al menos 32 caracteres"); }
 function safeEqual(a: string, b: string) { const left = Buffer.from(a); const right = Buffer.from(b); return left.length === right.length && timingSafeEqual(left, right); }
 
 export async function getAdminAccountByUsername(username: string) {
@@ -40,12 +39,12 @@ export async function provisionInitialAdmin() {
   return getAdminAccountByUsername(username);
 }
 
-export async function createAdminSession(username: string) { const token=createAdminSessionToken(username,secret(),Date.now()+maxAge*1000);(await cookies()).set(COOKIE,token,{httpOnly:true,sameSite:"lax",secure:process.env.NODE_ENV==="production",path:"/",maxAge}); }
-export async function getAdminSession() { const token=(await cookies()).get(COOKIE)?.value;if(!token)return null;return verifyAdminSessionToken(token,secret()); }
+export async function createAdminSession(username: string) { const token=createAdminSessionToken(username,adminSessionSecret(),Date.now()+maxAge*1000);(await cookies()).set(COOKIE,token,{httpOnly:true,sameSite:"lax",secure:process.env.NODE_ENV==="production",path:"/",maxAge}); }
+export async function getAdminSession() { const token=(await cookies()).get(COOKIE)?.value;if(!token)return null;return verifyAdminSessionToken(token,adminSessionSecret()); }
 export async function requireAdmin() { const session = await getAdminSession(); if (!session) redirect("/acceso-admin"); return session; }
 export async function clearAdminSession() { (await cookies()).delete(COOKIE); }
 export async function validAdminCredentials(username: string, password: string) {
-  if (process.env.NODE_ENV === "development") return safeEqual(username, "oros") && safeEqual(password, "oros");
+  if (acceptsDevelopmentAdminCredentials()) return safeEqual(username, "oros") && safeEqual(password, "oros");
   let account = await getAdminAccountByUsername(username);
   const expectedUsername = (process.env.ADMIN_USERNAME?.trim() || defaultAdminUsername);
   const recoveryEmail = process.env.ADMIN_RECOVERY_EMAIL?.trim() || process.env.RESEND_NOTIFICATION_EMAIL?.trim() || process.env.ADMIN_EMAIL?.trim();

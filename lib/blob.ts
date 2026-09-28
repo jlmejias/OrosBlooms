@@ -1,13 +1,20 @@
 import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { mkdir, readFile, stat, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
+import safety from "../scripts/e2e-safety.cjs";
+import { hasValidUploadSignature } from "./upload-validation.ts";
+
+const { e2eUploadRoot } = safety;
 
 type UploadedFile = { pathname: string; url: string };
 type PrivateFile = { bytes: Uint8Array; contentType: string; etag?: string; notModified?: boolean };
 
 const storageVariables = ["NEON_OBJECT_STORAGE_ENDPOINT", "NEON_OBJECT_STORAGE_ACCESS_KEY_ID", "NEON_OBJECT_STORAGE_SECRET_ACCESS_KEY", "NEON_OBJECT_STORAGE_PUBLIC_BUCKET", "NEON_OBJECT_STORAGE_PRIVATE_BUCKET"] as const;
 const hasRemoteStorage = () => storageVariables.every(name => Boolean(process.env[name]));
-const shouldUseLocalStorage = () => (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test" || process.env.LOCAL_STORAGE_FOR_QA === "true") && !hasRemoteStorage();
+export function shouldUseLocalStorage(environment: NodeJS.ProcessEnv = process.env) {
+  if (environment.LOCAL_STORAGE_FOR_QA === "true") return true;
+  return (environment.NODE_ENV === "development" || environment.NODE_ENV === "test") && storageVariables.some(name => !environment[name]);
+}
 function required(name: typeof storageVariables[number]) { const value = process.env[name]; if (!value) throw new Error(`${name} es obligatorio para Neon Object Storage.`); return value; }
 function safePathname(pathname: string) { if (!pathname || pathname.includes("..") || path.isAbsolute(pathname)) throw new Error("Ruta de archivo inválida."); return pathname.replaceAll("\\", "/"); }
 
@@ -17,17 +24,19 @@ function client() {
   return storage;
 }
 function publicUrl(pathname: string) { return `${required("NEON_OBJECT_STORAGE_ENDPOINT").replace(/\/$/, "")}/${required("NEON_OBJECT_STORAGE_PUBLIC_BUCKET")}/${pathname}`; }
-function localPublicPath(pathname: string) { return path.join(process.cwd(), "public", "uploads", safePathname(pathname)); }
-function localPrivatePath(pathname: string) { return path.join(process.cwd(), "storage", "object-storage", safePathname(pathname)); }
+function localPublicPath(pathname: string) { return process.env.LOCAL_STORAGE_FOR_QA === "true" ? path.join(e2eUploadRoot(), "public", safePathname(pathname)) : path.join(process.cwd(), "public", "uploads", safePathname(pathname)); }
+function localPrivatePath(pathname: string) { return process.env.LOCAL_STORAGE_FOR_QA === "true" ? path.join(e2eUploadRoot(), "private", safePathname(pathname)) : path.join(process.cwd(), "storage", "object-storage", safePathname(pathname)); }
 function contentType(pathname: string) { const extension=path.extname(pathname).toLowerCase();return ({".jpg":"image/jpeg",".jpeg":"image/jpeg",".png":"image/png",".webp":"image/webp",".svg":"image/svg+xml",".ico":"image/x-icon",".mp4":"video/mp4",".webm":"video/webm",".pdf":"application/pdf"} as Record<string,string>)[extension]??"application/octet-stream"; }
 
 export async function uploadPublicBlob(pathname: string, file: File): Promise<UploadedFile> {
   pathname=safePathname(pathname);
+  // SVG remains an explicitly supported branding format and is reviewed separately.
+  if (file.type !== "image/svg+xml" && !hasValidUploadSignature(new Uint8Array(await file.arrayBuffer()), file.type)) throw new Error("El contenido del archivo no coincide con su formato permitido.");
   if (shouldUseLocalStorage()) {
     const destination=localPublicPath(pathname);
     await mkdir(path.dirname(destination),{recursive:true});
     await writeFile(destination,Buffer.from(await file.arrayBuffer()));
-    return {pathname,url:`/uploads/${pathname}`};
+    return {pathname,url:process.env.LOCAL_STORAGE_FOR_QA === "true"?`/api/e2e-media/${pathname}`:`/uploads/${pathname}`};
   }
   await client().send(new PutObjectCommand({Bucket:required("NEON_OBJECT_STORAGE_PUBLIC_BUCKET"),Key:pathname,Body:Buffer.from(await file.arrayBuffer()),ContentType:file.type,CacheControl:"public, max-age=31536000, immutable"}));
   return {pathname,url:publicUrl(pathname)};
@@ -56,6 +65,16 @@ export async function getPrivateBlob(pathname: string, ifNoneMatch?: string): Pr
   }
   try { const result=await client().send(new GetObjectCommand({Bucket:required("NEON_OBJECT_STORAGE_PRIVATE_BUCKET"),Key:pathname}));const etag=result.ETag;if(ifNoneMatch&&etag===ifNoneMatch)return {bytes:new Uint8Array(),contentType:result.ContentType??"application/octet-stream",etag,notModified:true};const bytes=result.Body?await result.Body.transformToByteArray():new Uint8Array();return {bytes,contentType:result.ContentType??"application/octet-stream",etag}; }
   catch(error){const code=(error as {name?:string}).name;if(code==="NoSuchKey"||code==="NotFound")return null;throw error;}
+}
+
+export async function getE2ePublicBlob(pathname: string, ifNoneMatch?: string): Promise<PrivateFile | null> {
+  if (process.env.LOCAL_STORAGE_FOR_QA !== "true") return null;
+  pathname=safePathname(pathname);
+  try {
+    const destination=localPublicPath(pathname);const info=await stat(destination);const etag=`"${info.size}-${Math.trunc(info.mtimeMs)}"`;
+    if(ifNoneMatch===etag)return {bytes:new Uint8Array(),contentType:contentType(pathname),etag,notModified:true};
+    return {bytes:new Uint8Array(await readFile(destination)),contentType:contentType(pathname),etag};
+  } catch(error) { if((error as NodeJS.ErrnoException).code==="ENOENT")return null;throw error; }
 }
 
 export async function deletePrivateBlob(pathname: string) {

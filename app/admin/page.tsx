@@ -37,6 +37,10 @@ export default async function AdminDashboard() {
         <h3>Páginas más visitadas · últimos 30 días</h3>
         {analytics.topPages.length ? <table className="admin-table"><thead><tr><th>Página</th><th>Visitas</th><th>Visitantes</th></tr></thead><tbody>{analytics.topPages.map(page => <tr key={page.path}><td>{page.path === "/" ? "Portada" : page.path}</td><td>{page.views}</td><td>{page.visitors}</td></tr>)}</tbody></table> : <p>Aún no hay visitas registradas.</p>}
       </div>
+      <div className="admin-analytics-pages">
+        <h3>Ciudades con más visitas · últimos 30 días</h3>
+        {analytics.topCities.length ? <table className="admin-table"><thead><tr><th>Ciudad</th><th>Región / país</th><th>Visitas</th><th>Visitantes</th></tr></thead><tbody>{analytics.topCities.map(city => <tr key={`${city.city}-${city.region}-${city.country}`}><td>{city.city}</td><td>{[city.region, city.country].filter(Boolean).join(" · ") || "No disponible"}</td><td>{city.views}</td><td>{city.visitors}</td></tr>)}</tbody></table> : <p>Tu proveedor de hosting aún no ha enviado datos de ciudad para las visitas registradas.</p>}
+      </div>
     </section>
     <div className="admin-dashboard-list"><AdminDataTable columns={["Referencia", "Estado", "Fecha", "Acciones"]} rows={recent.map(item => ({ id: item.reference, cells: [{ primary: item.reference }, { primary: item.status, tone: item.status === "completed" || item.status === "approved" ? "active" as const : item.status === "rejected" ? "inactive" as const : "warning" as const }, item.createdAt.toLocaleDateString("es-CR")], filterValue: item.status }))} noun="solicitudes" searchPlaceholder="Buscar solicitudes recientes..." filterPlaceholder="Todos los estados" filterOptions={statusOptions}/></div>
   </>;

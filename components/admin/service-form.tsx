@@ -35,7 +35,7 @@ export function ServiceForm({ editing, translation, suggestedSortOrder = 0, onSu
 
   return <ValidatedAdminForm
     action={saveService}
-    required={["nameEs", "slug", "type", "descriptionEs"]}
+    required={["nameEs", "slug", "type"]}
     submitLabel={editing ? "Guardar cambios" : "Crear servicio"}
     onSuccess={onSuccess}
   >
@@ -50,7 +50,7 @@ export function ServiceForm({ editing, translation, suggestedSortOrder = 0, onSu
     </AdminFormSection>
     <AdminFormSection number="2" title="Descripciones" text="Explica el servicio en español e inglés.">
       <AdminFormGrid>
-        <label><span>Descripción en español <em>*</em></span><textarea name="descriptionEs" defaultValue={editing?.description ?? ""} placeholder="Describe el servicio" required maxLength={2000}/></label>
+        <label><span>Descripción en español</span><textarea name="descriptionEs" defaultValue={editing?.description ?? ""} placeholder="Describe el servicio" maxLength={2000}/></label>
         <label><span>Descripción en inglés</span><textarea name="descriptionEn" defaultValue={translation?.descriptionEn ?? ""} placeholder="Describe the service" maxLength={2000}/></label>
       </AdminFormGrid>
     </AdminFormSection>

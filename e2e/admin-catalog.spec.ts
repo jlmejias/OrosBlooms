@@ -4,17 +4,20 @@ import { createAdminSessionToken } from "../lib/admin-session";
 
 test("registra visitas públicas anónimas y las muestra en administración",async({page})=>{
   const [{total: before}]=await query<{total:string}>("select count(*)::text as total from page_views");
+  await page.setExtraHTTPHeaders({"x-vercel-id":"qa-test","x-vercel-ip-city":"San%20Jos%C3%A9","x-vercel-ip-country-region":"SJ","x-vercel-ip-country":"CR"});
   const tracked=page.waitForResponse(response=>response.url().endsWith("/api/analytics/pageview"));
   await page.goto("/");
   expect((await tracked).status()).toBe(204);
   await expect.poll(async()=>{const[{total}]=await query<{total:string}>("select count(*)::text as total from page_views");return Number(total);}).toBeGreaterThan(Number(before));
-  const [record]=await query<{path:string;visitor_hash:string}>("select path,visitor_hash from page_views order by visited_at desc limit 1");
+  const [record]=await query<{path:string;visitor_hash:string;city:string;region:string;country:string}>("select path,visitor_hash,city,region,country from page_views order by visited_at desc limit 1");
   expect(record.path).toBe("/");
   expect(record.visitor_hash).toMatch(/^[a-f0-9]{64}$/);
+  expect(record).toMatchObject({city:"San José",region:"SJ",country:"CR"});
   const token=createAdminSessionToken("OrosBlooms","qa-only-session-secret-with-at-least-32-characters",Date.now()+60_000);
   await page.context().addCookies([{name:"oros_admin_session",value:token,url:"http://127.0.0.1:3197"}]);
   await page.goto("/admin");
   await expect(page.getByText("Visitantes únicos hoy")).toBeVisible();
+  await expect(page.getByText("San José")).toBeVisible();
 });
 
 test("admin crea categoría y producto publicable que aparece en catálogo",async({page})=>{

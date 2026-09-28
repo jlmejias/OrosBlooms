@@ -14,7 +14,7 @@ function totalsSince(start: typeof costaRicaToday) {
 
 export async function getVisitorAnalytics() {
   const views = count(pageViews.id);
-  const [todayRows, sevenDayRows, thirtyDayRows, topPages] = await Promise.all([
+  const [todayRows, sevenDayRows, thirtyDayRows, topPages, topCities] = await Promise.all([
     totalsSince(costaRicaToday),
     totalsSince(lastSevenDays),
     totalsSince(lastThirtyDays),
@@ -24,6 +24,12 @@ export async function getVisitorAnalytics() {
       .groupBy(pageViews.path)
       .orderBy(desc(views))
       .limit(5),
+    db.select({ city: pageViews.city, region: pageViews.region, country: pageViews.country, views, visitors: countDistinct(pageViews.visitorHash) })
+      .from(pageViews)
+      .where(sql`${pageViews.visitedAt} >= ${lastThirtyDays} AND ${pageViews.city} IS NOT NULL`)
+      .groupBy(pageViews.city, pageViews.region, pageViews.country)
+      .orderBy(desc(views))
+      .limit(5),
   ]);
 
   return {
@@ -31,5 +37,6 @@ export async function getVisitorAnalytics() {
     sevenDays: sevenDayRows[0] ?? { views: 0, visitors: 0 },
     thirtyDays: thirtyDayRows[0] ?? { views: 0, visitors: 0 },
     topPages,
+    topCities,
   };
 }
