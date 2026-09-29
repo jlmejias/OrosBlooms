@@ -1,6 +1,19 @@
 export const pageSlugs = ["bodas", "eventos", "personalizados"] as const;
 export type PageSlug = typeof pageSlugs[number];
 export type PageImage = { id: string; url: string; provider?: string; providerId?: string; assetId?: string };
+export const pageFeatureIconOptions = [
+  { value: "bouquet", label: "Ramo" },
+  { value: "arch", label: "Arco de ceremonia" },
+  { value: "table", label: "Mesa" },
+  { value: "gift", label: "Regalo" },
+  { value: "stem", label: "Rama floral" },
+  { value: "flower", label: "Flor" },
+  { value: "chocolate", label: "Chocolate" },
+  { value: "bear", label: "Peluches" },
+  { value: "card", label: "Tarjeta" },
+] as const;
+export type PageFeatureIcon = typeof pageFeatureIconOptions[number]["value"];
+export type PageFeature = { titleEs: string; titleEn: string; descriptionEs: string; descriptionEn: string; icon: PageFeatureIcon };
 export type PageContent = {
   kickerEs: string;
   kickerEn: string;
@@ -18,6 +31,13 @@ export type PageContent = {
   ctaLabelEn: string;
   imageAltEs: string;
   imageAltEn: string;
+  heroAsideEs: string;
+  heroAsideEn: string;
+  detailKickerEs: string;
+  detailKickerEn: string;
+  secondaryCtaLabelEs: string;
+  secondaryCtaLabelEn: string;
+  features: PageFeature[];
 };
 
 const defaults: Record<PageSlug, PageContent> = {
@@ -38,6 +58,17 @@ const defaults: Record<PageSlug, PageContent> = {
     ctaLabelEn: "Request a proposal",
     imageAltEs: "Ceremonia decorada con flores",
     imageAltEn: "Ceremony decorated with flowers",
+    heroAsideEs: "Tu historia, en flor.",
+    heroAsideEn: "Your story, in bloom.",
+    detailKickerEs: "Una propuesta creada para ustedes",
+    detailKickerEn: "A proposal created for you",
+    secondaryCtaLabelEs: "Conocer nuestro enfoque",
+    secondaryCtaLabelEn: "Explore our approach",
+    features: [
+      { titleEs: "Ramo y flores personales", titleEn: "Bouquet and personal flowers", descriptionEs: "Piezas pensadas para acompañar cada momento.", descriptionEn: "Pieces designed to accompany every moment.", icon: "bouquet" },
+      { titleEs: "Flores de ceremonia", titleEn: "Ceremony florals", descriptionEs: "Diseño para un sí que se siente propio.", descriptionEn: "Design for a yes that feels like yours.", icon: "arch" },
+      { titleEs: "Ambientación de recepción", titleEn: "Reception styling", descriptionEs: "Detalles que unen el espacio y la celebración.", descriptionEn: "Details that bring the space and celebration together.", icon: "table" },
+    ],
   },
   eventos: {
     kickerEs: "Eventos",
@@ -56,6 +87,17 @@ const defaults: Record<PageSlug, PageContent> = {
     ctaLabelEn: "Tell us about your event",
     imageAltEs: "Flores para celebración",
     imageAltEn: "Flowers for a celebration",
+    heroAsideEs: "Momentos hechos para compartir.",
+    heroAsideEn: "Moments made to share.",
+    detailKickerEs: "Todo parte de una intención",
+    detailKickerEn: "Everything starts with an intention",
+    secondaryCtaLabelEs: "Ver cómo trabajamos",
+    secondaryCtaLabelEn: "See how we work",
+    features: [
+      { titleEs: "Celebraciones", titleEn: "Celebrations", descriptionEs: "Arreglos para los momentos que quieres recordar.", descriptionEn: "Arrangements for the moments you want to remember.", icon: "gift" },
+      { titleEs: "Encuentros", titleEn: "Gatherings", descriptionEs: "Flores que hacen sentir especial cada espacio.", descriptionEn: "Flowers that make every space feel special.", icon: "stem" },
+      { titleEs: "Ambientación", titleEn: "Styling", descriptionEs: "Detalles florales para recibir y sorprender.", descriptionEn: "Floral details to welcome and delight.", icon: "flower" },
+    ],
   },
   personalizados: {
     kickerEs: "Personalizados",
@@ -74,6 +116,17 @@ const defaults: Record<PageSlug, PageContent> = {
     ctaLabelEn: "Create a gift",
     imageAltEs: "Detalle floral en tonos rosados",
     imageAltEn: "Floral detail in blush tones",
+    heroAsideEs: "Detalles que hablan desde el corazón.",
+    heroAsideEn: "Details that speak from the heart.",
+    detailKickerEs: "Un detalle más",
+    detailKickerEn: "One more detail",
+    secondaryCtaLabelEs: "Ver opciones",
+    secondaryCtaLabelEn: "Explore options",
+    features: [
+      { titleEs: "Chocolates", titleEn: "Chocolates", descriptionEs: "Un toque dulce para acompañar tus flores.", descriptionEn: "A sweet touch to pair with your flowers.", icon: "chocolate" },
+      { titleEs: "Peluches", titleEn: "Teddy bears", descriptionEs: "Un detalle cálido para momentos especiales.", descriptionEn: "A warm detail for special moments.", icon: "bear" },
+      { titleEs: "Tarjetas y detalles", titleEn: "Cards and details", descriptionEs: "Mensajes y acabados hechos para tu historia.", descriptionEn: "Messages and finishes made for your story.", icon: "card" },
+    ],
   },
 };
 

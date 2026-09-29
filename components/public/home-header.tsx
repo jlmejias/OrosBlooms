@@ -10,7 +10,7 @@ import type { Locale } from "@/lib/i18n";
 
 export function HomeHeader({locale,logoUrl="/orosblooms-logo.png",logoAlt="OrosBlooms"}:{locale:Locale;logoUrl?:string;logoAlt?:string}) {
   const { cart } = useStore();
-  const nav=locale==="es"?[["Inicio","/"],["Flores","/flores"],["Bodas","/bodas"],["Eventos","/eventos"],["Personalizados","/personalizados"],["Galería","/galeria"]] as const:[["Home","/"],["Flowers","/flores"],["Weddings","/bodas"],["Events","/eventos"],["Personalized","/personalizados"],["Gallery","/galeria"]] as const;
+  const nav=locale==="es"?[["Inicio","/"],["Flores","/flores"],["Bodas","/weddings"],["Eventos","/events"],["Personalizados","/custom"],["Galería","/gallery"]] as const:[["Home","/"],["Flowers","/flores"],["Weddings","/weddings"],["Events","/events"],["Personalized","/custom"],["Gallery","/gallery"]] as const;
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);

@@ -26,7 +26,7 @@ export const defaultBrandingSettings: BrandingSettings = {
   logoUrl: "/orosblooms-logo.png",
   logoAltEs: "OrosBlooms",
   logoAltEn: "OrosBlooms",
-  faviconUrl: "/orosblooms-mark.png",
+  faviconUrl: "/orosblooms-favicon.png",
   heroVideoUrl: "/videos/hero-orosblooms.mp4",
   heroMediaMode: "image-video",
   heroImageUrl: "/home-hero.webp",
@@ -42,7 +42,8 @@ export const defaultBrandingSettings: BrandingSettings = {
 export const getBrandingSettings = cache(async (): Promise<BrandingSettings> => {
   const [row] = await db.select({ value: siteSettings.value }).from(siteSettings).where(eq(siteSettings.key, "branding")).limit(1);
   const settings = { ...defaultBrandingSettings, ...(row?.value as Partial<BrandingSettings> | undefined) };
-  return ["/icon.svg", "/orosblooms-favicon.png", "/orosblooms-mark.svg"].includes(settings.faviconUrl)
+  const faviconUrl = settings.faviconUrl === "/orosblooms-mark.png" ? "/orosblooms-favicon.png" : settings.faviconUrl;
+  return ["/icon.svg", "/orosblooms-mark.svg"].includes(faviconUrl)
     ? { ...settings, faviconUrl: defaultBrandingSettings.faviconUrl }
-    : settings;
+    : { ...settings, faviconUrl };
 });

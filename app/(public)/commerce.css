@@ -20,6 +20,205 @@
 @media(max-width:900px){.commerce-header nav{display:none}.commerce-header-inner{min-height:62px}.commerce-brand{margin-right:auto}.catalog-layout{grid-template-columns:1fr}.catalog-filters{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}.catalog-filters label{margin:0}.catalog-grid{grid-template-columns:repeat(2,1fr)}.detail-grid,.editorial-split{grid-template-columns:1fr}.detail-image{min-height:0;aspect-ratio:4/5}.editorial-image{min-height:420px}.saved-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.commerce-header-inner{width:min(100% - 1rem,1360px);gap:.5rem}.commerce-brand img{width:135px;height:42px}.commerce-tools{gap:.1rem}.commerce-wrap{width:min(100% - 2rem,1360px)}.commerce-hero{padding-top:3rem}.catalog-filters{grid-template-columns:1fr}.catalog-grid{gap:.7rem}.catalog-card-image{border-radius:13px}.catalog-card-info h2{font-size:1.15rem}.commerce-form{grid-template-columns:1fr}.commerce-form .form-wide{grid-column:auto}.cart-row{grid-template-columns:70px 1fr}.cart-row img{width:70px;height:70px}.cart-row>*:nth-child(n+3){grid-column:2}.commerce-footer{flex-direction:column}.commerce-footer nav{flex-wrap:wrap}}
 
+.service-redesign { padding-bottom: clamp(5rem, 9vw, 9rem); }
+.service-redesign-hero { display: grid; min-height: clamp(560px, 46vw, 720px); grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr); align-items: stretch; gap: clamp(2rem, 6vw, 7rem); padding: clamp(2rem, 5vw, 5rem) 0 clamp(4rem, 8vw, 7rem); }
+.service-redesign-hero-copy { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding-block: 2rem; }
+.service-redesign-hero h1 { max-width: 720px; margin-top: 1rem; font-family: var(--font-display); font-size: clamp(3.2rem, 6vw, 6.5rem); font-weight: 400; letter-spacing: -.065em; line-height: .98; }
+.service-redesign-description { max-width: 620px; margin-top: 1.6rem; color: var(--muted); font-family: var(--font-display); font-size: clamp(1.05rem, 1.5vw, 1.35rem); line-height: 1.5; }
+.service-redesign-hero-copy .home-pill { margin-top: 2rem; }
+.service-redesign-hero-image { position: relative; min-height: 540px; overflow: hidden; border-radius: 34px 34px 34px 120px; background: var(--cream); }
+.service-redesign-hero-image img, .service-redesign-editorial-image img, .service-redesign-thumb img { object-fit: cover; }
+.service-redesign-editorial { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); align-items: center; gap: clamp(2rem, 6vw, 7rem); padding: clamp(1rem, 3vw, 3rem); border-radius: 30px; background: color-mix(in srgb, var(--blush-soft) 48%, var(--background)); }
+.service-redesign-editorial-image { position: relative; min-height: 590px; overflow: hidden; border-radius: 26px; background: var(--cream); }
+.service-redesign-editorial-copy { max-width: 570px; padding: clamp(1rem, 3vw, 3rem) 0; }
+.service-redesign-editorial-copy h2 { margin-top: 1rem; font-family: var(--font-display); font-size: clamp(2.6rem, 4.3vw, 5rem); font-weight: 400; letter-spacing: -.06em; line-height: 1; }
+.service-redesign-editorial-copy > p:not(.commerce-kicker) { margin-top: 1.2rem; color: var(--muted); font-size: 1rem; line-height: 1.75; }
+.service-redesign-text-link { display: inline-flex; gap: .75rem; margin-top: 2rem; border-bottom: 1px solid currentColor; color: var(--burgundy); font-size: .86rem; font-weight: 700; text-decoration: none; }
+.service-redesign-image-rail { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .7rem; margin-top: 1.8rem; }
+.service-redesign-thumb { position: relative; aspect-ratio: 1; overflow: hidden; border-radius: 14px; background: var(--cream); }
+.service-redesign-personalized .service-redesign-hero { display: block; min-height: 0; padding-bottom: 3rem; }
+.service-redesign-personalized .service-redesign-hero-copy { max-width: 1050px; padding-block: 2rem 3rem; }
+.service-redesign-personalized .service-redesign-hero h1 { max-width: none; }
+.service-redesign-personalized .service-redesign-hero-image { display: none; }
+.service-redesign-personalized .service-redesign-editorial { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); padding: clamp(1.5rem, 5vw, 5rem); background: var(--blush-soft); }
+.service-redesign-personalized .service-redesign-editorial-image { min-height: 640px; border-radius: 180px 180px 32px 32px; }
+.service-redesign-personalized .service-redesign-editorial-copy { order: -1; }
+@media(max-width:900px){.service-redesign-hero,.service-redesign-editorial,.service-redesign-personalized .service-redesign-editorial{grid-template-columns:1fr;gap:1.5rem}.service-redesign-hero{min-height:0;padding-top:2rem}.service-redesign-hero-copy{padding-block:1rem}.service-redesign-hero-image{min-height:clamp(360px,68vw,560px);border-radius:24px}.service-redesign-editorial-image{min-height:clamp(360px,70vw,560px)}.service-redesign-personalized .service-redesign-editorial-copy{order:0}.service-redesign-personalized .service-redesign-editorial-image{min-height:clamp(360px,80vw,560px);border-radius:120px 120px 24px 24px}}
+@media(max-width:560px){.service-redesign{padding-bottom:7rem}.service-redesign-hero{padding-bottom:3rem}.service-redesign-hero h1{font-size:clamp(2.8rem,14vw,4.3rem)}.service-redesign-description{font-family:var(--font-body);font-size:1rem}.service-redesign-editorial{padding:1rem;border-radius:22px}.service-redesign-editorial-copy{padding:1rem 0}.service-redesign-editorial-copy h2{font-size:clamp(2.4rem,12vw,4rem)}.service-redesign-image-rail{gap:.45rem}.service-redesign-thumb{border-radius:10px}.service-redesign-personalized .service-redesign-editorial{padding:1rem}.service-redesign-personalized .service-redesign-editorial-image{border-radius:90px 90px 20px 20px}}
+
+.service-composition { padding: 0 0 clamp(5rem, 8vw, 8rem); }
+.service-composition h1, .service-composition h2, .service-composition h3 { font-family: var(--font-display); font-weight: 400; }
+.service-composition h1 { letter-spacing: -.065em; line-height: .96; }
+.service-composition h2 { letter-spacing: -.055em; line-height: 1; }
+.service-composition p { color: var(--muted); line-height: 1.7; }
+.service-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1.8rem; margin-top: 2rem; }
+.service-actions > a:not(.home-pill) { padding-bottom: .2rem; border-bottom: 1px solid currentColor; color: var(--muted); font-size: .85rem; text-decoration: none; }
+.service-actions > a:not(.home-pill):hover { color: var(--burgundy); }
+
+.weddings-hero { position: relative; min-height: clamp(430px, 35vw, 535px); overflow: hidden; background: #fbf8f3; }
+.weddings-hero-copy { position: relative; z-index: 2; display: flex; width: min(62%, 790px); min-height: inherit; flex-direction: column; align-items: flex-start; justify-content: center; padding: clamp(3rem, 6vw, 6rem) clamp(2rem, 4vw, 4.2rem); }
+.weddings-hero-copy h1 { max-width: 700px; margin-top: 1rem; font-size: clamp(2.5rem, 4.2vw, 4.5rem); }
+.weddings-hero-copy > p:not(.commerce-kicker) { max-width: 670px; margin-top: 1.45rem; font-family: var(--font-display); font-size: clamp(1rem, 1.4vw, 1.28rem); }
+.weddings-hero-image { position: absolute; inset: 0 0 0 37%; background: var(--cream); }
+.weddings-hero-image::after { position: absolute; inset: 0; background: linear-gradient(90deg,#fbf8f3 0%,rgb(251 248 243 / 92%) 10%,rgb(251 248 243 / 53%) 27%,transparent 56%); content: ""; pointer-events: none; }
+.weddings-hero-image img, .weddings-editorial-image img, .events-image img, .personalized-image img { object-fit: cover; }
+.weddings-editorial { position: relative; z-index: 3; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); align-items: stretch; gap: clamp(2rem, 4vw, 5rem); margin: clamp(-3.5rem, -4vw, -2rem) clamp(1rem, 2.5vw, 2.5rem) 0; padding: clamp(1.2rem, 2vw, 2rem); border-radius: 32px; background: #fff7f4; box-shadow: 0 18px 45px rgb(65 42 41 / 6%); }
+.weddings-editorial-image { position: relative; min-height: clamp(510px, 45vw, 650px); overflow: hidden; border-radius: 22px; background: var(--cream); }
+.weddings-editorial-copy { align-self: center; max-width: 580px; padding: clamp(1.5rem, 3vw, 3rem) clamp(.25rem, 1.4vw, 1.25rem); }
+.weddings-editorial-copy h2 { margin-top: 1rem; font-size: clamp(2.8rem, 4vw, 4.7rem); }
+.weddings-editorial-copy > p:not(.commerce-kicker) { margin-top: 1.1rem; font-size: .98rem; }
+
+.service-feature-list { display: grid; gap: 0; margin-top: 1.7rem; border-top: 1px solid rgb(81 67 56 / 17%); }
+.service-feature-list article { display: grid; grid-template-columns: 3rem 1fr; gap: .65rem; padding: 1rem 0; border-bottom: 1px solid rgb(81 67 56 / 12%); }
+.service-feature-list article > span { display: grid; width: 2.2rem; height: 2.2rem; place-items: center; border-radius: 50%; background: rgb(185 82 109 / 10%); color: var(--burgundy); font-size: .67rem; font-weight: 700; }
+.service-feature-list article > span svg { width: 1.2rem; height: 1.2rem; }
+.service-feature-list h3 { margin: 0; font-size: 1.25rem; }
+.service-feature-list p { margin: .2rem 0 0; font-size: .83rem; line-height: 1.45; }
+
+.events-stage { position: relative; display: grid; min-height: clamp(720px, 62vw, 890px); grid-template-columns: minmax(0, .95fr) minmax(390px, .85fr); gap: clamp(2rem, 6vw, 7rem); padding: clamp(4rem, 7vw, 6.5rem) clamp(1.5rem, 4vw, 4rem) clamp(3rem, 5vw, 5rem); overflow: hidden; background: #fbfaf5; }
+.events-copy { position: relative; z-index: 1; align-self: center; max-width: 670px; }
+.events-copy h1 { max-width: 650px; margin-top: 1rem; font-size: clamp(2.5rem, 4.2vw, 4.5rem); }
+.events-copy > p:not(.commerce-kicker) { max-width: 640px; margin-top: 1.1rem; font-size: .98rem; }
+.events-copy .events-intro { margin-top: 1.7rem; font-family: var(--font-display); font-size: clamp(1.12rem, 1.5vw, 1.45rem); line-height: 1.5; }
+.events-copy h2 { max-width: 530px; margin: 1.1rem 0 0; font-size: clamp(2.6rem, 4.5vw, 5rem); }
+.events-rule { width: min(100%, 580px); height: 1px; margin: 3rem 0 2rem; background: rgb(57 79 54 / 48%); }
+.events-image { position: relative; z-index: 1; min-height: 680px; align-self: center; overflow: hidden; border-radius: 220px 220px 36px 36px; background: var(--cream); }
+.service-composition-events .service-feature-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border: 0; }
+.service-composition-events .service-feature-list article { display: block; padding: 1rem clamp(.5rem, 1.2vw, 1.25rem); border-top: 0; border-right: 1px solid rgb(81 67 56 / 14%); border-bottom: 0; text-align: center; }
+.service-composition-events .service-feature-list article:first-child { padding-left: 0; }
+.service-composition-events .service-feature-list article:last-child { padding-right: 0; border-right: 0; }
+.service-composition-events .service-feature-list article > span { margin: 0 auto .6rem; }
+.service-composition-events .service-feature-list h3 { font-family: var(--font-body); font-size: .71rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+.service-composition-events .service-feature-list p { font-size: .77rem; }
+
+.personalized-heading { display: flex; align-items: end; justify-content: space-between; gap: 3rem; padding: clamp(3.8rem, 7vw, 6.8rem) clamp(.7rem, 1.8vw, 1.8rem) clamp(2.5rem, 4vw, 4.5rem); }
+.personalized-heading > div { max-width: 950px; }
+.personalized-heading h1 { margin-top: 1rem; font-size: clamp(2.5rem, 4.2vw, 4.5rem); }
+.personalized-heading p:not(.commerce-kicker) { max-width: 680px; margin-top: 1.35rem; font-size: clamp(1rem, 1.45vw, 1.28rem); }
+.personalized-heading aside { display: flex; max-width: 360px; align-items: center; gap: 1.15rem; padding: .8rem 0 .8rem 2.2rem; border-left: 1px solid rgb(185 82 109 / 28%); color: var(--muted); font-family: var(--font-display); font-size: 1.08rem; line-height: 1.45; }
+.personalized-heading aside p { margin: 0; }
+.personalized-heading-aside-image { position: relative; width: 64px; height: 76px; flex: none; overflow: hidden; border-radius: 50% 50% 10px 10px; background: var(--blush-soft); }
+.personalized-heading-aside-image img { object-fit: cover; }
+.personalized-stage { display: grid; min-height: 700px; grid-template-columns: minmax(0, 1.03fr) minmax(0, .97fr); gap: clamp(2rem, 5vw, 5.5rem); padding: clamp(2.4rem, 5vw, 5rem); overflow: hidden; border-radius: 30px; background: radial-gradient(circle at 0 100%,rgb(255 255 255 / 45%),transparent 28%),linear-gradient(125deg,#fff3f4,#f9dee6 55%,#f9e6ea); }
+.personalized-copy { align-self: center; max-width: 630px; }
+.personalized-copy h2 { max-width: 590px; margin-top: 1rem; font-size: clamp(2.8rem, 4.8vw, 5.3rem); }
+.personalized-copy > p:not(.commerce-kicker) { max-width: 540px; margin-top: 1.15rem; }
+.personalized-image { position: relative; min-height: 590px; align-self: end; overflow: hidden; border-radius: 220px 220px 30px 30px; background: var(--cream); }
+.personalized-feature-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem; margin-top: 1.7rem; }
+.personalized-feature-cards article { min-width: 0; padding: .7rem .7rem 1rem; border-radius: 17px; background: rgb(255 255 255 / 74%); text-align: center; }
+.personalized-feature-cards article > div { position: relative; width: min(100%, 120px); aspect-ratio: 1; margin: 0 auto .8rem; overflow: hidden; border-radius: 50%; background: #f4e8df; }
+.personalized-feature-cards img { object-fit: cover; }
+.personalized-feature-cards h3 { margin: 0; font-size: 1.08rem; line-height: 1.1; }
+.personalized-feature-cards p { margin: .35rem 0 0; font-size: .76rem; line-height: 1.4; }
+.service-composition-personalized .home-pill-dark { background: var(--burgundy); }
+.service-composition-personalized .home-pill-dark:hover { background: #9d3d59; }
+
+@media(max-width:900px){.weddings-hero{display:grid;grid-template-columns:1fr;min-height:0}.weddings-hero-copy{width:auto;min-height:0;padding:3.5rem 2rem 2.5rem}.weddings-hero-image{position:relative;inset:auto;min-height:480px}.weddings-hero-image::after{background:linear-gradient(0deg,rgb(33 29 27 / 36%),transparent 45%)}.weddings-editorial{grid-template-columns:1fr;gap:0}.weddings-editorial-copy{max-width:680px;padding:2.2rem 1rem}.events-stage{grid-template-columns:1fr;min-height:0;gap:2rem}.events-copy{max-width:none}.events-image{min-height:560px;max-width:620px;width:100%;justify-self:center}.personalized-heading{align-items:start;flex-direction:column;gap:1.6rem}.personalized-heading aside{max-width:520px}.personalized-stage{grid-template-columns:1fr;gap:2rem}.personalized-image{order:-1;min-height:560px;max-width:680px;width:100%;justify-self:center}.personalized-copy{max-width:none}}
+@media(max-width:600px){.service-composition{padding-bottom:7rem}.service-actions{gap:1rem;margin-top:1.6rem}.weddings-hero-copy{padding:3rem 1.25rem 2rem}.weddings-hero-copy h1,.events-copy h1,.personalized-heading h1{font-size:clamp(3rem,15vw,4.6rem)}.weddings-hero-copy>p:not(.commerce-kicker),.personalized-heading p:not(.commerce-kicker){font-family:var(--font-body);font-size:1rem}.weddings-hero-image{min-height:390px}.weddings-editorial{margin:0;padding:.8rem;border-radius:20px}.weddings-editorial-image{min-height:430px;border-radius:15px}.weddings-editorial-copy{padding:1.5rem .5rem}.weddings-editorial-copy h2,.events-copy h2,.personalized-copy h2{font-size:clamp(2.5rem,12vw,4rem)}.events-stage{padding:3.4rem 1.2rem 2rem}.events-rule{margin:2.1rem 0 1.6rem}.events-image{min-height:460px;border-radius:150px 150px 22px 22px}.service-composition-events .service-feature-list{grid-template-columns:1fr}.service-composition-events .service-feature-list article,.service-composition-events .service-feature-list article:first-child,.service-composition-events .service-feature-list article:last-child{display:grid;grid-template-columns:2.5rem 1fr;gap:.65rem;padding:1rem 0;border-right:0;border-bottom:1px solid rgb(81 67 56 / 12%);text-align:left}.service-composition-events .service-feature-list article>span{margin:0}.service-composition-events .service-feature-list p{margin:.25rem 0 0}.personalized-heading{padding:3rem .5rem 2rem}.personalized-heading aside{padding-left:1.4rem;font-size:1rem}.personalized-stage{padding:1rem;border-radius:20px}.personalized-image{min-height:430px;border-radius:140px 140px 18px 18px}.personalized-copy{padding:1.2rem .3rem 1.5rem}.personalized-feature-cards{gap:.45rem}.personalized-feature-cards article{padding:.5rem .35rem .7rem;border-radius:12px}.personalized-feature-cards article>div{margin-bottom:.55rem}.personalized-feature-cards h3{font-size:.92rem}.personalized-feature-cards p{font-size:.68rem}.service-composition-personalized .service-actions>a:not(.home-pill){display:none}}
+
+@media(max-width:600px){.weddings-hero-copy h1,.events-copy h1,.personalized-heading h1{font-size:clamp(2.5rem,11vw,3.35rem)}.weddings-editorial{margin:-1.5rem .5rem 0}}
+
+/* Reuse the same public-page gutter, hero rhythm and primary type scale as Flores and Galería. */
+.weddings-hero-copy { width: min(62%, 790px); align-items: flex-start; justify-content: flex-start; padding: clamp(2.5rem, 4vw, 4rem) 0 3rem; }
+.weddings-hero-copy h1, .events-copy h1, .personalized-heading h1 { font-size: clamp(2.5rem, 4.2vw, 4.5rem); }
+.weddings-hero-copy > p:not(.commerce-kicker), .events-copy .events-intro, .personalized-heading p:not(.commerce-kicker) { font-family: var(--font-body); font-size: 1.05rem; line-height: 1.7; }
+.weddings-editorial { margin-right: 0; margin-left: 0; }
+.weddings-editorial-image { min-height: clamp(430px, 39vw, 560px); }
+.events-stage { padding: clamp(2.5rem, 4vw, 4rem) 0 3rem; }
+.personalized-heading { padding: clamp(2.5rem, 4vw, 4rem) 0 3rem; }
+.weddings-editorial-copy h2, .events-copy h2, .personalized-copy h2 { font-size: clamp(2.5rem, 3.6vw, 3.75rem); }
+@media(max-width:900px){.weddings-hero-copy{padding-right:0;padding-left:0}.events-stage{padding-right:0;padding-left:0}.personalized-heading{padding-right:0;padding-left:0}}
+@media(max-width:600px){.weddings-hero-copy h1,.events-copy h1,.personalized-heading h1{font-size:clamp(2.5rem,4.2vw,4.5rem)}.weddings-editorial{margin:-1.5rem 0 0}.weddings-hero-copy>p:not(.commerce-kicker),.events-copy .events-intro,.personalized-heading p:not(.commerce-kicker){font-size:1.05rem}}
+
+/* Keep the three editorial layouts readable on narrow phones. */
+@media(max-width:480px){
+  .weddings-editorial-image{min-height:360px}
+  .events-image{min-height:390px;border-radius:112px 112px 20px 20px}
+  .personalized-image{min-height:400px;border-radius:112px 112px 20px 20px}
+  .personalized-feature-cards{grid-template-columns:1fr;gap:.65rem}
+  .personalized-feature-cards article{display:grid;grid-template-columns:72px minmax(0,1fr);column-gap:.8rem;align-items:center;padding:.7rem;text-align:left}
+  .personalized-feature-cards article>div{grid-row:1/3;width:72px;margin:0}
+  .personalized-feature-cards h3{font-size:1rem}
+  .personalized-feature-cards p{font-size:.76rem}
+}
+
+/* Responsive composition for Bodas, Eventos and Personalizados. */
+.events-hero-copy .events-intro,.events-editorial-copy>p:not(.commerce-kicker){max-width:640px;margin-top:1.1rem;font-size:.98rem}.personalized-editorial-copy>p:not(.commerce-kicker){max-width:540px;margin-top:1.15rem}
+
+@media (min-width:768px) and (max-width:1023px){
+  .service-composition{padding-bottom:5.5rem}
+  .weddings-hero{display:block;min-height:460px}
+  .weddings-hero-copy{width:54%;min-height:inherit;justify-content:center;padding:2.75rem 0}
+  .weddings-hero-image{position:absolute;inset:0 0 0 43%;min-height:0}
+  .weddings-hero-image::after{background:linear-gradient(90deg,#fbf8f3 0%,rgb(251 248 243 / 88%) 12%,rgb(251 248 243 / 42%) 31%,transparent 58%)}
+  .weddings-editorial{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:1.25rem;margin:-1.25rem 0 0;padding:1rem}
+  .weddings-editorial-image{min-height:410px}
+  .weddings-editorial-copy{padding:1rem .45rem}
+  .weddings-editorial-copy h2,.events-copy h2,.personalized-copy h2{font-size:clamp(2.25rem,4.25vw,3.25rem)}
+  .events-stage{grid-template-columns:minmax(0,1fr) minmax(300px,.82fr);min-height:620px;gap:1.5rem;padding:2.75rem 0 3rem}
+  .events-copy{align-self:center;max-width:none}
+  .events-image{min-height:480px;max-width:none;width:100%;justify-self:stretch;border-radius:170px 170px 28px 28px}
+  .service-composition-events .service-feature-list article{padding:1rem .45rem}
+  .service-composition-events .service-feature-list h3{font-size:.65rem}
+  .service-composition-events .service-feature-list p{font-size:.72rem}
+  .personalized-heading{flex-direction:row;align-items:flex-end;gap:1.75rem;padding:2.75rem 0 2.5rem}
+  .personalized-heading>div{max-width:660px}
+  .personalized-heading aside{max-width:285px;padding-left:1.35rem;font-size:1rem}
+  .personalized-stage{grid-template-columns:minmax(0,1fr) minmax(300px,.88fr);min-height:540px;gap:1.5rem;padding:1.5rem}
+  .personalized-image{order:initial;min-height:470px;max-width:none;width:100%;justify-self:stretch;border-radius:170px 170px 24px 24px}
+  .personalized-feature-cards{gap:.55rem}
+  .personalized-feature-cards article{padding:.55rem .4rem .75rem}
+  .personalized-feature-cards h3{font-size:.95rem}
+}
+
+@media (max-width:767px){
+  .commerce-wrap{width:min(100% - 2.5rem,1360px)}
+  .service-composition{padding-bottom:calc(7.5rem + env(safe-area-inset-bottom))}
+  .service-actions{gap:.9rem;margin-top:1.35rem}
+  .weddings-hero{display:grid;grid-template-columns:1fr;min-height:0}
+  .weddings-hero-copy{width:auto;min-height:0;padding:2.5rem 0 1.75rem;justify-content:flex-start}
+  .weddings-hero-copy h1,.events-copy h1,.personalized-heading h1{font-size:clamp(2.4rem,10vw,3rem)}
+  .weddings-hero-copy>p:not(.commerce-kicker),.events-hero-copy .events-intro,.personalized-heading p:not(.commerce-kicker){font-size:1rem;line-height:1.65}
+  .weddings-hero-image{position:relative;inset:auto;min-height:0;aspect-ratio:4/5;border-radius:20px}
+  .weddings-hero-image::after{background:none}
+  .weddings-editorial{grid-template-columns:1fr;gap:1.35rem;margin:1.75rem 0 0;padding:1rem;border-radius:22px}
+  .weddings-editorial-copy{order:1;max-width:none;padding:.3rem}
+  .weddings-editorial-image{order:2;min-height:0;aspect-ratio:4/5;border-radius:16px}
+  .weddings-editorial-copy h2,.events-copy h2,.personalized-copy h2{font-size:clamp(2rem,8.5vw,2.55rem)}
+  .events-stage{grid-template-columns:1fr;min-height:0;gap:1.65rem;padding:2.5rem 0 0}
+  .events-copy{display:contents}
+  .events-hero-copy{order:1}
+  .events-image{order:2;min-height:0;max-width:none;width:100%;aspect-ratio:4/5;justify-self:stretch;border-radius:140px 140px 22px 22px}
+  .events-editorial-copy{order:3;padding-bottom:.25rem}
+  .events-rule{width:100%;margin:2rem 0 1.5rem}
+  .service-composition-events .service-feature-list{grid-template-columns:1fr;margin-top:1.35rem}
+  .service-composition-events .service-feature-list article,.service-composition-events .service-feature-list article:first-child,.service-composition-events .service-feature-list article:last-child{display:grid;grid-template-columns:2.45rem minmax(0,1fr);gap:.7rem;padding:.9rem 0;border-right:0;border-bottom:1px solid rgb(81 67 56 / 12%);text-align:left}
+  .service-composition-events .service-feature-list article>span{margin:0}
+  .service-composition-events .service-feature-list h3{font-size:.72rem}
+  .service-composition-events .service-feature-list p{font-size:.78rem}
+  .personalized-heading{align-items:flex-start;gap:1.2rem;padding:2.5rem 0 1.75rem}
+  .personalized-heading aside{max-width:100%;padding-left:1.2rem;font-size:1rem}
+  .personalized-stage{grid-template-columns:1fr;min-height:0;gap:1.35rem;padding:1rem;border-radius:22px}
+  .personalized-copy{display:contents}
+  .personalized-editorial-copy{order:1;padding:.45rem .25rem 0}
+  .personalized-image{order:2;min-height:0;max-width:none;width:100%;aspect-ratio:4/5;justify-self:stretch;border-radius:140px 140px 20px 20px}
+  .personalized-feature-cards{order:3;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem;margin-top:0}
+  .personalized-feature-cards article{padding:.65rem .5rem .8rem;border-radius:14px}
+  .personalized-feature-cards h3{font-size:.98rem}
+  .personalized-feature-cards p{font-size:.73rem}
+  .personalized-actions{order:4;margin-top:.2rem}
+}
+
+@media (max-width:480px){
+  .weddings-hero-copy h1,.events-copy h1,.personalized-heading h1{font-size:clamp(2.35rem,10.5vw,2.8rem)}
+  .weddings-editorial-image,.events-image,.personalized-image{aspect-ratio:4/5}
+  .personalized-feature-cards{grid-template-columns:1fr}
+  .personalized-feature-cards article{display:grid;grid-template-columns:72px minmax(0,1fr);column-gap:.8rem;align-items:center;padding:.7rem;text-align:left}
+  .personalized-feature-cards article>div{grid-row:1/3;width:72px;margin:0}
+  .personalized-feature-cards h3{font-size:1rem}
+  .personalized-feature-cards p{font-size:.76rem}
+}
+
 /* Cart */
 .cart-layout{display:grid;grid-template-columns:minmax(0,1fr) 390px;align-items:start;gap:2rem;padding-bottom:7rem}.cart-items{overflow:hidden;border:1px solid var(--border);border-radius:22px;background:#fff}.cart-items-heading{display:flex;align-items:baseline;justify-content:space-between;padding:1.35rem 1.5rem;border-bottom:1px solid var(--border)}.cart-items-heading h2{margin:0;font-family:var(--font-display);font-size:1.8rem;font-weight:500}.cart-items-heading span{color:#77766f;font-size:.84rem}.cart-row{display:grid;grid-template-columns:120px minmax(0,1fr) 150px 110px;align-items:center;gap:1.4rem;padding:1.35rem 1.5rem;border:0;border-bottom:1px solid var(--border);border-radius:0;background:#fff}.cart-row:last-child{border-bottom:0}.cart-row-image{position:relative;aspect-ratio:1;overflow:hidden;border-radius:15px;background:var(--cream)}.cart-row .cart-row-image img{width:100%;height:100%;border-radius:0;object-fit:cover}.cart-row-copy h3{margin:.18rem 0 .45rem;font-family:var(--font-display);font-size:1.45rem;font-weight:500;line-height:1.15}.cart-row-eyebrow{margin:0;color:#77806f;font-size:.65rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase}.cart-row-note{margin:.3rem 0;color:#77766f;font-size:.84rem;line-height:1.5}.cart-remove{display:inline-flex;align-items:center;gap:.3rem;margin-top:.45rem;padding:0;border:0;background:transparent;color:#8a554f;font-size:.78rem;text-decoration:underline;text-underline-offset:3px;cursor:pointer}.cart-remove span{font-size:1.05rem;text-decoration:none}.cart-quantity{display:grid;justify-items:center;gap:.45rem}.cart-quantity>span{color:#77766f;font-size:.72rem}.cart-stepper{display:grid;grid-template-columns:34px 42px 34px;overflow:hidden;border:1px solid #dcd8cf;border-radius:999px;background:#fff}.cart-row .cart-stepper button,.cart-row .cart-stepper input{width:auto;min-height:36px;padding:0;border:0;background:transparent;text-align:center}.cart-stepper button{font-size:1rem;cursor:pointer}.cart-stepper button:hover{background:#f3f0e9}.cart-stepper input{-moz-appearance:textfield;font-weight:600}.cart-stepper input::-webkit-inner-spin-button,.cart-stepper input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}.cart-row-price{text-align:right;white-space:nowrap;font-size:1rem}.cart-summary{position:sticky;top:112px;display:grid;gap:1rem;margin:0;padding:1.55rem;border:1px solid #e4ded2;border-radius:22px;background:#f1ece2;text-align:left;box-shadow:0 16px 45px rgb(41 45 37 / 7%)}.cart-summary-kicker{margin:0;color:#6c7566;font-size:.68rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase}.cart-summary-line{display:flex;align-items:end;justify-content:space-between;gap:1rem;padding-bottom:1rem;border-bottom:1px solid #d9d1c3}.cart-summary-line span{font-size:.9rem}.cart-summary-line strong{font-family:var(--font-display);font-size:1.7rem;font-weight:500}.cart-summary-note{margin:0;color:#666960;font-size:.82rem;line-height:1.55}.cart-summary .commerce-primary{display:flex;justify-content:center;width:100%;padding:.9rem 1rem;text-align:center}.cart-clear{justify-self:center;padding:.2rem;border:0;background:transparent;color:#666960;font-size:.8rem;text-decoration:underline;text-underline-offset:3px;cursor:pointer}.cart-empty{display:grid;justify-items:center;gap:.7rem;padding:4.5rem 1.5rem 7rem;border:1px solid var(--border);border-radius:22px;background:#fff;text-align:center}.cart-empty>span{color:#9c6c61;font-size:1.7rem}.cart-empty h2{margin:0;font-family:var(--font-display);font-size:2rem;font-weight:500}.cart-empty p{max-width:440px;margin:0 0 .7rem;color:#73766e}.cart-empty .commerce-primary{display:inline-flex}
 @media(max-width:1000px){.cart-layout{grid-template-columns:1fr}.cart-summary{position:static;width:100%;max-width:none}.cart-row{grid-template-columns:110px minmax(0,1fr) 140px 100px}}

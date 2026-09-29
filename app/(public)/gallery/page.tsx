@@ -6,7 +6,7 @@ import { asc, desc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { galleryImages, galleryItems, mediaAssets } from "@/db/schema";
 
-export const metadata: Metadata = { title: "Galería floral", description: "Inspiración de arreglos, bodas y celebraciones creadas por OrosBlooms.", alternates: { canonical: "/galeria" } };
+export const metadata: Metadata = { title: "Galería floral", description: "Inspiración de arreglos, bodas y celebraciones creadas por OrosBlooms.", alternates: { canonical: "/gallery" } };
 
 export default async function GalleryPage() {
   const locale=await getLocale();const es=locale==="es";

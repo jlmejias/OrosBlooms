@@ -36,6 +36,14 @@ const nextConfig: NextConfig = {
     remotePatterns: neonImagePattern ? [neonImagePattern] : [],
   },
   experimental: { serverActions: { bodySizeLimit: "48mb" } },
+  async redirects() {
+    return [
+      { source: "/bodas", destination: "/weddings", permanent: true },
+      { source: "/eventos", destination: "/events", permanent: true },
+      { source: "/personalizados", destination: "/custom", permanent: true },
+      { source: "/galeria", destination: "/gallery", permanent: true },
+    ];
+  },
   async headers() {
     const securityHeaders = [
       { key: "X-Content-Type-Options", value: "nosniff" },

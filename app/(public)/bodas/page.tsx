@@ -1,6 +1,1 @@
-import type { Metadata } from "next"; import Link from "next/link"; import { PublicShell } from "@/components/commerce/public-shell"; import { ServiceGallery } from "@/components/public/service-gallery";
-import { getLocale } from "@/lib/i18n";
-import { getServiceContent } from "@/lib/service-content";
-import { defaultServicePageContent } from "@/lib/service-page";
-export const metadata: Metadata = { title: "Flores para bodas", description: "Diseño floral integral para bodas en Costa Rica.", alternates: { canonical: "/bodas" } };
-export default async function WeddingsPage(){const[locale,service]=await Promise.all([getLocale(),getServiceContent("bodas")]);const es=locale==="es";const page=service?.page??defaultServicePageContent("bodas");return <PublicShell><div className="commerce-wrap service-page"><header className="commerce-hero"><p className="commerce-kicker">{es?page.kickerEs:page.kickerEn}</p><h1>{es?page.titleEs:page.titleEn}</h1><p>{es?page.descriptionEs:page.descriptionEn}</p></header><section className="editorial-split"><ServiceGallery images={service?.images??[]} fallback="/home-wedding.webp" alt={es?page.imageAltEs:page.imageAltEn}/><div className="editorial-copy"><h2>{es?page.detailTitleEs:page.detailTitleEn}</h2><p>{es?page.detailBodyOneEs:page.detailBodyOneEn}</p>{(es?page.detailBodyTwoEs:page.detailBodyTwoEn)&&<p>{es?page.detailBodyTwoEs:page.detailBodyTwoEn}</p>}<Link href="/solicitar?tipo=boda">{es?page.ctaLabelEs:page.ctaLabelEn} →</Link></div></section></div></PublicShell>}
+export { default, metadata } from "../weddings/page";

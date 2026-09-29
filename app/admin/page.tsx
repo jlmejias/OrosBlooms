@@ -6,6 +6,23 @@ import { customers, inquiries, orders, products } from "@/db/schema";
 import { requireAdmin } from "@/lib/admin-auth";
 import { getVisitorAnalytics } from "@/lib/visitor-analytics";
 
+const emptyVisitorAnalytics = {
+  today: { views: 0, visitors: 0 },
+  sevenDays: { views: 0, visitors: 0 },
+  thirtyDays: { views: 0, visitors: 0 },
+  topPages: [],
+  topCities: [],
+};
+
+async function getDashboardAnalytics() {
+  try {
+    return await getVisitorAnalytics();
+  } catch (error) {
+    console.error("[admin] No se pudieron cargar las analíticas", error);
+    return emptyVisitorAnalytics;
+  }
+}
+
 export default async function AdminDashboard() {
   await requireAdmin();
   const [[productCount], [inquiryCount], [orderCount], [customerCount], recent, analytics] = await Promise.all([
@@ -14,7 +31,7 @@ export default async function AdminDashboard() {
     db.select({ value: count() }).from(orders),
     db.select({ value: count() }).from(customers),
     db.select({ reference: inquiries.reference, status: inquiries.status, createdAt: inquiries.createdAt }).from(inquiries).orderBy(sql`${inquiries.createdAt} desc`).limit(6),
-    getVisitorAnalytics(),
+    getDashboardAnalytics(),
   ]);
   const statusOptions = [...new Set(recent.map(item => item.status))].map(value => ({ value, label: value }));
 

@@ -36,12 +36,9 @@ export async function generateMetadata(): Promise<Metadata> {
     applicationName: branding.brandName,
     title: { default: title, template: `%s | ${branding.brandName}` },
     icons: {
-      icon: [
-        { url: "/orosblooms-mark.png", type: "image/png", sizes: "192x192" },
-        { url: branding.faviconUrl },
-      ],
-      shortcut: "/orosblooms-mark.png",
-      apple: "/orosblooms-mark.png",
+      icon: [{ url: branding.faviconUrl || "/orosblooms-favicon.png", type: "image/png" }],
+      shortcut: branding.faviconUrl || "/orosblooms-favicon.png",
+      apple: branding.faviconUrl || "/orosblooms-favicon.png",
     },
     openGraph: {
       ...baseMetadata.openGraph,
