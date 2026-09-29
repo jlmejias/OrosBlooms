@@ -9,6 +9,7 @@ import { inquiryTransitions, orderTransitions } from "@/lib/workflow";
 
 type Inquiry = { id: string; reference: string; status: keyof typeof inquiryTransitions; type: string; notes: string | null; internalNotes: string | null; notificationStatus: string; notificationError: string | null; createdAt: string; customer: string; phone: string | null };
 type Order = { id: string; reference: string; status: string; total: number; deposit: number; balance: number; createdAt: string; customer: string; email: string | null; paymentMethod: string | null; paymentStatus: string; paymentProofAssetId: string | null };
+type OrderLine = { id: string; orderId: string; name: string; quantity: number; unitPrice: number; lineTotal: number; personalization: Record<string, unknown> | null; imageUrl: string | null };
 
 const inquiryLabels: Record<string, string> = { new: "Nueva", reviewing: "En revisión", quoting: "Cotizando", quoted: "Cotizada", approved: "Aprobada", rejected: "Rechazada", completed: "Completada" };
 const orderLabels: Record<string, string> = { draft: "Borrador", pending: "Pendiente", confirmed: "Confirmado", preparing: "Preparando", ready: "Listo", delivered: "Entregado", cancelled: "Cancelado" };
@@ -52,11 +53,29 @@ function paymentMethodLabel(method: string | null) {
   return "Sin método";
 }
 
+function orderLineNotes(personalization: OrderLine["personalization"]) {
+  const value = (key: string) => typeof personalization?.[key] === "string" && personalization[key].trim() ? personalization[key] : null;
+  return { product: value("productNote"), order: value("orderNote"), legacy: value("message") };
+}
+
 function MetricCard({ icon, value, label, tone }: { icon: React.ReactNode; value: string | number; label: string; tone: string }) {
   return <article className={`order-metric-card is-${tone}`}><span className="order-metric-icon">{icon}</span><span><strong>{value}</strong><small>{label}</small></span></article>;
 }
 
-export function OrderTable({ items }: { items: Order[] }) {
+function OrderLinePreview({ line }: { line: OrderLine }) {
+  const notes = orderLineNotes(line.personalization);
+  return <div className="order-line-tooltip">
+    {line.imageUrl ? <img src={line.imageUrl} alt=""/> : <span className="order-line-tooltip-placeholder" aria-hidden="true">Sin<br/>imagen</span>}
+    <div><strong>{line.name}</strong><small>{line.quantity} {line.quantity === 1 ? "unidad" : "unidades"}</small><dl><div><dt>Precio unitario</dt><dd>{formatCRC(line.unitPrice)}</dd></div><div><dt>Total</dt><dd>{formatCRC(line.lineTotal)}</dd></div></dl>{(notes.product || notes.order || notes.legacy) && <div className="order-line-tooltip-notes">{notes.product && <p><span>Dedicatoria del producto</span>{notes.product}</p>}{notes.order && <p><span>Nota general del pedido</span>{notes.order}</p>}{notes.legacy && <p><span>Nota registrada</span>{notes.legacy}</p>}</div>}</div>
+  </div>;
+}
+
+function OrderLineItem({ line }: { line: OrderLine }) {
+  const notes = orderLineNotes(line.personalization);
+  return <Tooltip color="#fffefa" classNames={{ root: "order-line-tooltip-overlay" }} styles={{ container: { color: "#303b2e", padding: ".8rem", borderRadius: 12, boxShadow: "0 12px 30px rgb(37 49 36 / 18%)" } }} placement="right" title={<OrderLinePreview line={line}/>}><li tabIndex={0}><b>{line.quantity}×</b> {line.name}{notes.product && <small> · Dedicatoria: {notes.product}</small>}{notes.order && <small> · Nota general: {notes.order}</small>}{notes.legacy && <small> · Nota registrada: {notes.legacy}</small>}</li></Tooltip>;
+}
+
+export function OrderTable({ items, lines }: { items: Order[]; lines: OrderLine[] }) {
   const { message, modal } = App.useApp();
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>();
@@ -66,10 +85,12 @@ export function OrderTable({ items }: { items: Order[] }) {
   const [deletingId, setDeletingId] = useState<string>();
   const [reviewingId, setReviewingId] = useState<string>();
   const [notifyingId, setNotifyingId] = useState<string>();
+  const linesByOrder = useMemo(() => lines.reduce((grouped, line) => { const current = grouped.get(line.orderId) ?? []; current.push(line); grouped.set(line.orderId, current); return grouped; }, new Map<string, OrderLine[]>()), [lines]);
   const data = useMemo(() => items.filter(item => {
-    const matchesQuery = `${item.reference} ${item.customer} ${item.email ?? ""}`.toLowerCase().includes(query.toLowerCase());
+    const lineNames = linesByOrder.get(item.id)?.map(line => line.name).join(" ") ?? "";
+    const matchesQuery = `${item.reference} ${item.customer} ${item.email ?? ""} ${lineNames}`.toLowerCase().includes(query.toLowerCase());
     return matchesQuery && (!statusFilter || item.status === statusFilter) && (!paymentFilter || item.paymentStatus === paymentFilter);
-  }), [items, paymentFilter, query, statusFilter]);
+  }), [items, linesByOrder, paymentFilter, query, statusFilter]);
   const metrics = useMemo(() => ({
     pending: items.filter(item => item.status === "draft" || item.status === "pending").length,
     preparing: items.filter(item => item.status === "preparing").length,
@@ -97,10 +118,10 @@ export function OrderTable({ items }: { items: Order[] }) {
     </div>
     <div className="order-table-card">
       <Table className="orders-table" rowKey="id" dataSource={data} pagination={{ pageSize: 10, showSizeChanger: true }} scroll={{ x: 1220 }} columns={[
-        { title: "Pedido", dataIndex: "reference", width: 180, render: (value, item: Order) => <div className="order-reference"><strong>{value}</strong><small>{new Date(item.createdAt).toLocaleDateString("es-CR", { day: "numeric", month: "short", year: "numeric" })}</small></div> },
+        { title: "Pedido", dataIndex: "reference", width: 230, render: (value, item: Order) => { const orderLines = linesByOrder.get(item.id) ?? []; return <div className="order-reference"><strong>{value}</strong><small>{new Date(item.createdAt).toLocaleDateString("es-CR", { day: "numeric", month: "short", year: "numeric" })}</small>{orderLines.length ? <ul className="order-line-items">{orderLines.map(line => <OrderLineItem key={line.id} line={line}/>)}</ul> : <small className="order-line-empty">Sin artículos registrados</small>}</div>; } },
         { title: "Cliente", dataIndex: "customer", width: 205, render: (value, item: Order) => <div className="order-customer"><UserOutlined/><span><strong>{value}</strong><small>{item.email ?? "Sin correo electrónico"}</small></span></div> },
         { title: "Total", dataIndex: "total", width: 105, render: value => <strong className="order-total">{formatCRC(value)}</strong> },
-        { title: "Estado", width: 170, render: (_, item: Order) => { const value = changes[item.id] ?? item.status; return <span className={`order-status-control is-${orderTone(value)}`}><i/><Select aria-label={`Estado del pedido ${item.reference}`} disabled={savingId === item.id || deletingId === item.id} value={value} options={orderStatuses.filter(option => option.value === item.status || orderTransitions[item.status as keyof typeof orderTransitions].includes(option.value as never))} onChange={next => setChanges(current => ({ ...current, [item.id]: next }))}/></span>; } },
+        { title: "Estado", width: 170, render: (_, item: Order) => { const value = changes[item.id] ?? item.status; return <span className={`order-status-control is-${orderTone(value)}`}><Select aria-label={`Estado del pedido ${item.reference}`} disabled={savingId === item.id || deletingId === item.id} value={value} options={orderStatuses.filter(option => option.value === item.status || orderTransitions[item.status as keyof typeof orderTransitions].includes(option.value as never))} onChange={next => setChanges(current => ({ ...current, [item.id]: next }))}/></span>; } },
         { title: "Situación", dataIndex: "status", width: 132, render: value => <span className={`order-situation is-${orderTone(value)}`}>{orderLabels[value] ?? value}</span> },
         { title: "Pago", width: 265, render: (_, item: Order) => <div className="order-payment"><span className={`order-payment-badge is-${item.paymentStatus}`}>{item.paymentStatus === "paid" && item.balance > 0 ? "Adelanto pagado" : paymentLabels[item.paymentStatus] ?? item.paymentStatus}</span><small>{paymentMethodLabel(item.paymentMethod)}</small>{item.balance > 0 && <small>Adelanto: {formatCRC(item.deposit)} · Saldo: {formatCRC(item.balance)}</small>}{item.paymentProofAssetId && <a href={`/api/private-media/${item.paymentProofAssetId}`} target="_blank" rel="noreferrer"><FileTextOutlined/> Ver comprobante</a>}{item.paymentStatus === "pending_review" && <Space size={5}><Button size="small" type="primary" loading={reviewingId === item.id} onClick={() => reviewPayment(item, "paid")}>Confirmar</Button><Button size="small" danger loading={reviewingId === item.id} disabled={Boolean(reviewingId)} onClick={() => reviewPayment(item, "failed")}>Rechazar</Button></Space>}{["paid", "failed"].includes(item.paymentStatus) && <Button className="order-resend-email" type="link" size="small" icon={<SendOutlined/>} loading={notifyingId === item.id} onClick={() => resendPaymentEmail(item)}>Reenviar correo</Button>}</div> },
         { title: "Acciones", width: 125, fixed: "right", render: (_, item: Order) => <Space size={7}><Tooltip title="Guardar cambios"><Button aria-label={`Guardar pedido ${item.reference}`} className="order-icon-action" shape="circle" type="text" loading={savingId === item.id} disabled={Boolean(deletingId)} icon={<SaveOutlined/>} onClick={() => save(item)}/></Tooltip><Popconfirm title={`Eliminar pedido ${item.reference}`} description="Esta acción no se puede deshacer." okText="Eliminar" cancelText="Cancelar" okButtonProps={{ danger: true, loading: deletingId === item.id }} onConfirm={() => remove(item.id)}><Button aria-label={`Eliminar pedido ${item.reference}`} className="order-icon-action is-danger" shape="circle" type="text" loading={deletingId === item.id} disabled={Boolean(savingId)} icon={<DeleteOutlined/>}/></Popconfirm></Space> },

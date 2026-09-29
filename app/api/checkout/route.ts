@@ -9,8 +9,9 @@ import { clientIp, consumeRateLimit } from "@/lib/rate-limit";
 import { calculateOrderPricing } from "@/lib/order-pricing";
 import { sendOrderCreatedEmails } from "@/lib/email";
 
-const productLineSchema = z.object({ kind: z.literal("product"), productId: z.string().uuid(), variantId: z.string().uuid().optional(), quantity: z.number().int().min(1).max(20), personalization: z.string().trim().max(500).optional() });
-const comboLineSchema = z.object({ kind: z.literal("combo"), comboId: z.string().uuid(), quantity: z.number().int().min(1).max(20), personalization: z.string().trim().max(500).optional() });
+const orderNoteSchema = z.string().trim().max(500).optional();
+const productLineSchema = z.object({ kind: z.literal("product"), productId: z.string().uuid(), variantId: z.string().uuid().optional(), quantity: z.number().int().min(1).max(20), productNote: orderNoteSchema, orderNote: orderNoteSchema });
+const comboLineSchema = z.object({ kind: z.literal("combo"), comboId: z.string().uuid(), quantity: z.number().int().min(1).max(20), productNote: orderNoteSchema, orderNote: orderNoteSchema });
 const bodySchema = z.object({
   name: z.string().trim().min(2).max(120),
   email: z.email(),
@@ -22,7 +23,7 @@ const bodySchema = z.object({
   items: z.array(z.discriminatedUnion("kind", [productLineSchema, comboLineSchema])).min(1).max(30),
 }).refine(value => value.fulfillment === "pickup" || Boolean(value.deliveryAddress), { message: "Dirección requerida para entrega" });
 
-type OrderLine = { productId?: string; variantId?: string; comboId?: string; name: string; unitPrice: number; quantity: number; personalization?: string };
+type OrderLine = { productId?: string; variantId?: string; comboId?: string; name: string; unitPrice: number; quantity: number; productNote?: string; orderNote?: string };
 class CheckoutError extends Error { constructor(message: string, readonly status = 409) { super(message); } }
 function postgresCode(error: unknown) {
   if (typeof error !== "object" || error === null) return undefined;
@@ -78,7 +79,7 @@ export async function POST(request: Request) {
           if (!product || product.status !== "active") throw new CheckoutError("Un producto ya no está disponible.");
           const variant = await resolveVariant(product.id, item.variantId);
           if (variant) addInventory(variant.id, item.quantity, variant.stock);
-          lines.push({ productId: product.id, variantId: variant?.id, name: product.name, unitPrice: variant?.price ?? product.basePrice, quantity: item.quantity, personalization: item.personalization });
+          lines.push({ productId: product.id, variantId: variant?.id, name: product.name, unitPrice: variant?.price ?? product.basePrice, quantity: item.quantity, productNote: item.productNote, orderNote: item.orderNote });
           continue;
         }
         const combo = comboById.get(item.comboId);
@@ -89,7 +90,7 @@ export async function POST(request: Request) {
           const variant = await resolveVariant(component.productId, component.variantId ?? undefined);
           if (variant) addInventory(variant.id, component.quantity * item.quantity, variant.stock);
         }
-        lines.push({ comboId: combo.id, name: combo.name, unitPrice: combo.promotionalPrice ?? combo.price, quantity: item.quantity, personalization: item.personalization });
+        lines.push({ comboId: combo.id, name: combo.name, unitPrice: combo.promotionalPrice ?? combo.price, quantity: item.quantity, productNote: item.productNote, orderNote: item.orderNote });
       }
 
       const subtotal = lines.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0);
@@ -109,7 +110,7 @@ export async function POST(request: Request) {
       const reference = `PED-${randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase()}`;
       const trackingToken = randomUUID().replaceAll("-", "");
       const [order] = await tx.insert(orders).values({ reference, idempotencyKey, trackingToken, customerId, fulfillment: value.fulfillment, deliveryAddress: value.deliveryAddress || null, subtotal: pricing.subtotal, deliveryFee: pricing.deliveryFee, total: pricing.total, deposit: pricing.deposit, balance: pricing.balance, paymentMethod: "zelle", paymentStatus: "unpaid", status: "pending" }).returning({ id: orders.id, reference: orders.reference, trackingToken: orders.trackingToken, total: orders.total, deposit: orders.deposit, balance: orders.balance });
-      await tx.insert(orderItems).values(lines.map(line => ({ orderId: order.id, productId: line.productId, variantId: line.variantId, comboId: line.comboId, nameSnapshot: line.name, unitPriceSnapshot: line.unitPrice, quantity: line.quantity, personalization: line.personalization ? { message: line.personalization } : null, lineTotal: line.unitPrice * line.quantity })));
+      await tx.insert(orderItems).values(lines.map(line => ({ orderId: order.id, productId: line.productId, variantId: line.variantId, comboId: line.comboId, nameSnapshot: line.name, unitPriceSnapshot: line.unitPrice, quantity: line.quantity, personalization: line.productNote || line.orderNote ? { productNote: line.productNote ?? null, orderNote: line.orderNote ?? null } : null, lineTotal: line.unitPrice * line.quantity })));
       if (inventory.size) await tx.insert(orderInventoryItems).values([...inventory].map(([variantId, quantity]) => ({ orderId: order.id, variantId, quantity })));
       return order;
     });
