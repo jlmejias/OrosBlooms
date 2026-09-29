@@ -114,7 +114,17 @@ export async function POST(request: Request) {
       return order;
     });
     const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
-    await sendOrderCreatedEmails({ reference: result.reference, name: value.name, email: value.email || undefined, phone: value.phone, fulfillment: value.fulfillment, amount: result.deposit, total: result.total, balance: result.balance, zelleRecipient: process.env.ZELLE_RECIPIENT, trackingUrl: `${siteUrl}/pedido/${result.reference}?token=${result.trackingToken}` }).catch(error => console.error("order_email_failed", { reference: result.reference, error }));
+    try {
+      const email = await sendOrderCreatedEmails({ reference: result.reference, name: value.name, email: value.email || undefined, phone: value.phone, fulfillment: value.fulfillment, amount: result.deposit, total: result.total, balance: result.balance, zelleRecipient: process.env.ZELLE_RECIPIENT, trackingUrl: `${siteUrl}/pedido/${result.reference}?token=${result.trackingToken}` });
+      const emailWasMocked = "mocked" in email && email.mocked;
+      if (!email.sent || (process.env.NODE_ENV === "production" && emailWasMocked)) {
+        console.error("order_email_not_sent", { reference: result.reference, reason: email.sent ? "mock-transport" : email.reason });
+        return NextResponse.json({ error: "No pudimos enviar el correo de confirmación. Intenta nuevamente en unos minutos." }, { status: 503 });
+      }
+    } catch (error) {
+      console.error("order_email_failed", { reference: result.reference, error });
+      return NextResponse.json({ error: "No pudimos enviar el correo de confirmación. Intenta nuevamente en unos minutos." }, { status: 503 });
+    }
     return NextResponse.json(responseFor(result));
   } catch (error) {
     if (error instanceof CheckoutError) return NextResponse.json({ error: error.message }, { status: error.status });
@@ -122,7 +132,7 @@ export async function POST(request: Request) {
       const idempotencyKey = request.headers.get("idempotency-key")?.trim();
       if (idempotencyKey) {
         const [existing] = await db.select({ reference: orders.reference, trackingToken: orders.trackingToken, total: orders.total, deposit: orders.deposit, balance: orders.balance }).from(orders).where(eq(orders.idempotencyKey, idempotencyKey)).limit(1);
-        if (existing) return NextResponse.json(responseFor(existing));
+        if (existing) return NextResponse.json({ error: "Estamos preparando la confirmación de tu pedido. Intenta nuevamente en unos segundos." }, { status: 409 });
       }
       return NextResponse.json({ error: "La solicitud ya está siendo procesada. Intenta nuevamente." }, { status: 409 });
     }
