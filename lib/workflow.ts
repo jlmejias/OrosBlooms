@@ -9,11 +9,11 @@ export const inquiryTransitions = {
 } as const;
 
 export const orderTransitions = {
-  draft: ["pending", "cancelled"],
-  pending: ["confirmed", "cancelled"],
-  confirmed: ["preparing", "cancelled"],
+  draft: ["ready", "cancelled"],
+  pending: ["ready", "cancelled"],
+  confirmed: ["ready", "cancelled"],
   preparing: ["ready", "cancelled"],
-  ready: ["delivered", "cancelled"],
+  ready: ["cancelled"],
   delivered: [],
   cancelled: [],
 } as const;

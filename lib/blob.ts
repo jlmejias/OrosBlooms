@@ -1,5 +1,5 @@
-import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { mkdir, readFile, stat, unlink, writeFile } from "node:fs/promises";
+import { DeleteObjectCommand, GetObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { mkdir, readFile, readdir, stat, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import safety from "../scripts/e2e-safety.cjs";
 import { hasValidUploadSignature } from "./upload-validation.ts";
@@ -24,6 +24,11 @@ function client() {
   return storage;
 }
 function publicUrl(pathname: string) { return `${required("NEON_OBJECT_STORAGE_ENDPOINT").replace(/\/$/, "")}/${required("NEON_OBJECT_STORAGE_PUBLIC_BUCKET")}/${pathname}`; }
+export function publicBlobUrl(pathname: string) {
+  pathname = safePathname(pathname);
+  if (shouldUseLocalStorage()) return process.env.LOCAL_STORAGE_FOR_QA === "true" ? `/api/e2e-media/${pathname}` : `/uploads/${pathname}`;
+  return publicUrl(pathname);
+}
 function localPublicPath(pathname: string) { return process.env.LOCAL_STORAGE_FOR_QA === "true" ? path.join(e2eUploadRoot(), "public", safePathname(pathname)) : path.join(process.cwd(), "public", "uploads", safePathname(pathname)); }
 function localPrivatePath(pathname: string) { return process.env.LOCAL_STORAGE_FOR_QA === "true" ? path.join(e2eUploadRoot(), "private", safePathname(pathname)) : path.join(process.cwd(), "storage", "object-storage", safePathname(pathname)); }
 function contentType(pathname: string) { const extension=path.extname(pathname).toLowerCase();return ({".jpg":"image/jpeg",".jpeg":"image/jpeg",".png":"image/png",".webp":"image/webp",".svg":"image/svg+xml",".ico":"image/x-icon",".mp4":"video/mp4",".webm":"video/webm",".pdf":"application/pdf"} as Record<string,string>)[extension]??"application/octet-stream"; }
@@ -94,3 +99,47 @@ export async function deletePublicBlob(pathname: string) {
   }
   await client().send(new DeleteObjectCommand({ Bucket: required("NEON_OBJECT_STORAGE_PUBLIC_BUCKET"), Key: pathname }));
 }
+
+export type StoredPublicBlob = { pathname: string; bytes: number; modifiedAt: Date };
+
+async function listBlobs(visibility: "public" | "private"): Promise<StoredPublicBlob[]> {
+  if (shouldUseLocalStorage()) {
+    const root = process.env.LOCAL_STORAGE_FOR_QA === "true"
+      ? path.join(e2eUploadRoot(), visibility)
+      : visibility === "public"
+        ? path.join(process.cwd(), "public", "uploads")
+        : path.join(process.cwd(), "storage", "object-storage");
+    const result: StoredPublicBlob[] = [];
+    async function visit(directory: string) {
+      let entries;
+      try { entries = await readdir(directory, { withFileTypes: true }); }
+      catch (error) { if ((error as NodeJS.ErrnoException).code === "ENOENT") return; throw error; }
+      for (const entry of entries) {
+        const location = path.join(directory, entry.name);
+        if (entry.isDirectory()) await visit(location);
+        else if (entry.isFile()) {
+          const info = await stat(location);
+          result.push({ pathname: path.relative(root, location).replaceAll("\\", "/"), bytes: info.size, modifiedAt: info.mtime });
+        }
+      }
+    }
+    await visit(root);
+    return result;
+  }
+  const result: StoredPublicBlob[] = [];
+  let token: string | undefined;
+  do {
+    const page = await client().send(new ListObjectsV2Command({
+      Bucket: required(visibility === "public" ? "NEON_OBJECT_STORAGE_PUBLIC_BUCKET" : "NEON_OBJECT_STORAGE_PRIVATE_BUCKET"),
+      ContinuationToken: token,
+    }));
+    for (const item of page.Contents ?? []) {
+      if (item.Key && item.LastModified) result.push({ pathname: item.Key, bytes: item.Size ?? 0, modifiedAt: item.LastModified });
+    }
+    token = page.IsTruncated ? page.NextContinuationToken : undefined;
+  } while (token);
+  return result;
+}
+
+export function listPublicBlobs() { return listBlobs("public"); }
+export function listPrivateBlobs() { return listBlobs("private"); }

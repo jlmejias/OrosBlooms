@@ -1,6 +1,7 @@
 "use client";
 
 import { Modal } from "antd";
+import Link from "next/link";
 import { formatCRC } from "@/lib/format";
 import type { Locale } from "@/lib/i18n";
 
@@ -17,5 +18,11 @@ export function CheckoutPaymentConfirmation({ open, quote, locale, loading, onCa
       <div className="checkout-confirm-deposit"><dt>{es ? `Pago requerido hoy · ${quote.depositPercent}%` : `Payment due today · ${quote.depositPercent}%`}</dt><dd>{formatCRC(quote.deposit)}</dd></div>
       <div><dt>{es ? "Saldo después del pago" : "Balance after payment"}</dt><dd>{formatCRC(quote.balance)}</dd></div>
     </dl>
+    <p style={{ margin: "1rem 0 0", color: "#687166", fontSize: ".75rem", lineHeight: 1.6 }}>
+      {es ? "Al confirmar tu pedido, aceptas nuestros " : "By confirming your order, you accept our "}
+      <Link href="/legal/terminos" target="_blank">{es ? "Términos y condiciones" : "Terms and Conditions"}</Link>
+      {es ? " y nuestra " : " and our "}
+      <Link href="/legal/privacidad" target="_blank">{es ? "Política de privacidad" : "Privacy Policy"}</Link>.
+    </p>
   </Modal>;
 }
