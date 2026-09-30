@@ -19,6 +19,17 @@ function text(form: FormData, name: string) {
 
 export async function savePageLayoutContent(form: FormData) {
   const pageKey = z.enum(pageSlugs).parse(text(form, "pageKey"));
+  let existingImages: unknown;
+  try {
+    existingImages = JSON.parse(text(form, "galleryImages"));
+  } catch {
+    throw new Error("La galería de imágenes no es válida.");
+  }
+  if (!Array.isArray(existingImages)) throw new Error("La galería de imágenes no es válida.");
+  const newImages = form.getAll("imageFiles").filter(file => file instanceof File && file.size > 0);
+  const maxImages = pageKey === "personalizados" ? 5 : 24;
+  if (newImages.length > 5) throw new Error("Puedes agregar hasta 5 imágenes por guardado.");
+  if (existingImages.length + newImages.length > maxImages) throw new Error(`Esta página admite un máximo de ${maxImages} imágenes.`);
   const layout = {
     heroAsideEs: field.parse(text(form, "heroAsideEs")),
     heroAsideEn: field.parse(text(form, "heroAsideEn")),

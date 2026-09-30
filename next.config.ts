@@ -35,7 +35,7 @@ const nextConfig: NextConfig = {
     // This lets next/image optimize them on storefront pages as well as in admin.
     remotePatterns: neonImagePattern ? [neonImagePattern] : [],
   },
-  experimental: { serverActions: { bodySizeLimit: "48mb" } },
+  experimental: { serverActions: { bodySizeLimit: "64mb" } },
   async redirects() {
     return [
       { source: "/bodas", destination: "/weddings", permanent: true },

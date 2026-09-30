@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { PageContent, PageFeature, PageImage } from "@/lib/service-page";
+import { ServicePageImageGallery } from "./service-page-image-gallery";
 
 type ServiceVariant = "weddings" | "events" | "personalized";
 
@@ -29,12 +30,12 @@ export function ServicePageLayout({ variant, locale, page, images, ctaHref }: { 
   const gallery = images.length ? images : [{ id: "fallback", url: fallbackImages[variant] }];
   const image = (index: number) => gallery[index] ?? gallery[0];
 
-  if (variant === "weddings") return <WeddingsLayout copy={copy} image={image} ctaHref={ctaHref} />;
-  if (variant === "events") return <EventsLayout copy={copy} image={image} ctaHref={ctaHref} />;
+  if (variant === "weddings") return <WeddingsLayout copy={copy} image={image} images={images} locale={locale} ctaHref={ctaHref} />;
+  if (variant === "events") return <EventsLayout copy={copy} image={image} images={images} locale={locale} ctaHref={ctaHref} />;
   return <PersonalizedLayout copy={copy} image={image} ctaHref={ctaHref} />;
 }
 
-function WeddingsLayout({ copy, image, ctaHref }: { copy: Copy; image: (index: number) => PageImage; ctaHref: string }) {
+function WeddingsLayout({ copy, image, images, locale, ctaHref }: { copy: Copy; image: (index: number) => PageImage; images: PageImage[]; locale: "es" | "en"; ctaHref: string }) {
   return <div className="service-composition service-composition-weddings">
     <header className="weddings-hero">
       <div className="weddings-hero-copy">
@@ -47,14 +48,15 @@ function WeddingsLayout({ copy, image, ctaHref }: { copy: Copy; image: (index: n
       <div className="weddings-editorial-image"><Image src={image(1).url} alt={copy.alt} fill sizes="(max-width: 760px) 100vw, 52vw"/></div>
       <div className="weddings-editorial-copy"><p className="commerce-kicker">{copy.detailKicker}</p><h2>{copy.detailTitle}</h2><p>{copy.detailOne}</p>{copy.detailTwo&&<p>{copy.detailTwo}</p>}<FeatureList features={copy.features}/></div>
     </section>
+    <ServicePageImageGallery images={images.slice(2)} alt={copy.alt} locale={locale}/>
   </div>;
 }
 
-function EventsLayout({ copy, image, ctaHref }: { copy: Copy; image: (index: number) => PageImage; ctaHref: string }) {
+function EventsLayout({ copy, image, images, locale, ctaHref }: { copy: Copy; image: (index: number) => PageImage; images: PageImage[]; locale: "es" | "en"; ctaHref: string }) {
   return <div className="service-composition service-composition-events" id="detalle"><section className="events-stage">
     <div className="events-copy"><div className="events-hero-copy"><p className="commerce-kicker">{copy.kicker}</p><h1>{copy.title}</h1><p className="events-intro">{copy.description}</p><div className="service-actions"><Link className="home-pill home-pill-dark" href={ctaHref}>{copy.primaryCta}<span aria-hidden="true">→</span></Link></div></div><div className="events-editorial-copy"><div className="events-rule"/><p className="commerce-kicker">{copy.detailKicker}</p><h2>{copy.detailTitle}</h2><p>{copy.detailOne}</p>{copy.detailTwo&&<p>{copy.detailTwo}</p>}<FeatureList features={copy.features}/></div></div>
     <div className="events-image"><Image src={image(0).url} alt={copy.alt} fill priority sizes="(max-width: 760px) 100vw, 48vw"/></div>
-  </section></div>;
+  </section><ServicePageImageGallery images={images.slice(1)} alt={copy.alt} locale={locale}/></div>;
 }
 
 function PersonalizedLayout({ copy, image, ctaHref }: { copy: Copy; image: (index: number) => PageImage; ctaHref: string }) {
